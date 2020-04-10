@@ -1,0 +1,36 @@
+# Install and load relevant packages
+install.packages("dplyr")
+install.packages("mice")
+library(mice)
+library(dplyr)
+
+###### Load and read gambling preregistration scoring dataset:
+data<- read.csv("Data_files/fictitious_example_scores_for_pre-reg_analysis_plan.csv")
+
+head(data) # Check the data has loaded correctly
+names(data) # Check the data has loaded correctly
+View(data) # Check the data has loaded correctly
+
+# Select only the restriction scores columns & rows
+dataimp<- select(data, 5:33)
+View(dataimp)
+
+dataimp_mat<- as.matrix(dataimp) #
+
+md.pattern(dataimp_mat) #check how many missing values there are and where they are
+
+######## Imputation of missing values for gambling preregistration restriction scores
+for(i in 1:nrow(dataimp_mat))
+{
+  for(j in 1:ncol(dataimp_mat))
+  {
+    if(is.na(dataimp_mat[i,j])) #check if value is missing
+    {
+      dataimp_mat[i,j] = mean(dataimp_mat[i, ], na.rm=TRUE) + mean(dataimp_mat[,j], na.rm=T) - mean(dataimp_mat, na.rm=T)
+    }
+  }
+}
+
+dataimp_imputed_df <- as.data.frame(dataimp_mat)
+
+dataimp_imputed_df # 
