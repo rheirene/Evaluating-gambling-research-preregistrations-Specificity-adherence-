@@ -1,0 +1,11 @@
+# Randomly order and select 60 gambling study preregistrations
+# **Only relevant if more than 60 gambling study preregistrations are identified***
+
+# load and read the data set containing the list of preregistrations
+data<- read.csv("Data_files/fictitious_example_scores_for_pre-reg_analysis_plan.csv")
+head(data) # Check the data has loaded correctly
+names(data) # Check the data has loaded correctly
+View(data) # Check the data has loaded correctly
+
+# Randomly order gambling study preregistrations and select the first 60 
+data[sample(nrow(data), 60), ]
