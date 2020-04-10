@@ -1,0 +1,715 @@
+ #  Load and install relevant packages
+install.packages("tidyverse")
+install.packages("yarrr")
+install.packages("mice")
+install.packages("reshape")
+
+library(reshape)
+library(tidyverse)
+library(yarrr)
+library(mice)
+
+###### load and read the dataset from Veldkamp et al. (2018)
+# 1. Manually download the RData file from: 
+# 2. Manually load the RData file into workspace
+    
+# 3. Select the relevant object and write into a readable csv file:
+write.table(group0,
+            file = "multidiscpinary_registrationsveldkamp.csv",
+            sep = ",",
+            row.names = TRUE)
+
+Veldkampdata<- read.csv("Data_files/multidiscpinary_registrationsveldkamp.csv") # Read the dataset
+
+head(Veldkampdata) # Check the data has loaded correctly
+names(Veldkampdata) # Check the data has loaded correctly
+View(Veldkampdata) # Check the data has loaded correctly
+
+
+###### Load and read gambling preregistration scoring dataset:
+data<- read.csv("Data_files/fictitious_example_scores_for_pre-reg_analysis_plan.csv")
+
+head(data) # Check the data has loaded correctly
+names(data) # Check the data has loaded correctly
+View(data) # Check the data has loaded correctly
+
+
+datatemp <- data.frame(data[which(data$Preregistration_group==2),1:33])
+view(datatemp)
+
+# objectname <- with(imputed.data.gam, function(variables))
+# summary(pool(objectname))
+
+###### Combine the two datasets:
+combinedata<-bind_rows(datatemp, Veldkampdata, id = NULL)
+
+head(combinedata) # Check the data has loaded correctly
+names(combinedata) # Check the data has loaded correctly
+View(combinedata) # Check the data has loaded correctly
+
+
+# ________________________ ANALYSES ________________________
+# Compute some easily readable descriptive statistics for each *restriction* score for both the gambling and crossdiscplinary preregistrations:
+
+T.Restriction.Scores<<- combinedata %>%
+    group_by(Preregistration_group)%>% # Create a dataframe of outcomes so that they can all be easily viewed and exported
+    summarise(
+        n = n(),
+    T1mean = mean(T1, na.rm = TRUE),
+    T1median = median(T1, na.rm = TRUE),
+    T1sd = sd(T1, na.rm = TRUE),
+    T2mean = mean(T2, na.rm = TRUE),
+    T2median = median(T2, na.rm = TRUE),
+    T2sd = sd(T2, na.rm = TRUE))
+    
+View(T.Restriction.Scores) # View outcomes
+
+D.Restriction.Scores<- combinedata %>% # Create a dataframe of outcomes so that they can all be easily viewed and exported
+  group_by(Preregistration_group)%>%
+  summarise(
+    n = n(), 
+    D1mean = mean(D1, na.rm = TRUE),
+    D1median = median(D1, na.rm = TRUE),
+    D1sd = sd(D1, na.rm = TRUE),
+    D2mean = mean(D2, na.rm = TRUE),
+    D2median = median(D2, na.rm = TRUE),
+    D2sd = sd(D2, na.rm = TRUE),
+    D3mean = mean(D3, na.rm = TRUE),
+    D3median = median(D3, na.rm = TRUE),
+    D3sd = sd(D3, na.rm = TRUE), 
+    D4mean = mean(D4, na.rm = TRUE),
+    D4median = median(D4, na.rm = TRUE),
+    D4sd = sd(D4, na.rm = TRUE),
+    D5mean = mean(D5, na.rm = TRUE),
+    D5median = median(D5, na.rm = TRUE),
+    D5sd = sd(D5, na.rm = TRUE),
+    D6mean = mean(D6, na.rm = TRUE),
+    D6median = median(D6, na.rm = TRUE),
+    D6sd = sd(D6, na.rm = TRUE),
+    D7mean = mean(D7, na.rm = TRUE),
+    D7median = median(D7, na.rm = TRUE),
+    D7sd = sd(D7, na.rm = TRUE))
+
+View(D.Restriction.Scores) # View outcomes
+
+C.Restriction.Scores<- combinedata %>% # Create a dataframe of outcomes so that they can all be easily viewed and exported
+  group_by(Preregistration_group)%>%
+  summarise(
+    n = n(),
+    C1mean = mean(C1, na.rm = TRUE),
+    C1median = median(C1, na.rm = TRUE),
+    C1sd = sd(C1, na.rm = TRUE),
+    C2mean = mean(C2, na.rm = TRUE),
+    C2median = median(C2, na.rm = TRUE),
+    C2sd = sd(C2, na.rm = TRUE),
+    C3mean = mean(C3, na.rm = TRUE),
+    C3median = median(C3, na.rm = TRUE),
+    C3sd = sd(C3, na.rm = TRUE),
+    C4mean = mean(C4, na.rm = TRUE),
+    C4median = median(C4, na.rm = TRUE),
+    C4sd = sd(C4, na.rm = TRUE))
+
+View(C.Restriction.Scores) # View outcomes
+
+A.Restriction.Scores<- combinedata %>% # Create a dataframe of outcomes so that they can all be easily viewed and exported
+  group_by(Preregistration_group)%>%
+  summarise(
+    n = n(),
+    A1mean = mean(A1, na.rm = TRUE),
+    A1median = median(A1, na.rm = TRUE),
+    A1sd = sd(A1, na.rm = TRUE),
+    A2mean = mean(A2, na.rm = TRUE),
+    A2median = median(A2, na.rm = TRUE),
+    A2sd = sd(A2, na.rm = TRUE),
+    A2mean = mean(A2, na.rm = TRUE),
+    A2median = median(A2, na.rm = TRUE),
+    A2sd = sd(A2, na.rm = TRUE),
+    A3mean = mean(A3, na.rm = TRUE),
+    A3median = median(A3, na.rm = TRUE),
+    A3sd = sd(A3, na.rm = TRUE),
+    A4mean = mean(A4, na.rm = TRUE),
+    A4median = median(A4, na.rm = TRUE),
+    A4sd = sd(A4, na.rm = TRUE),
+    A5mean = mean(A5, na.rm = TRUE),
+    A5median = median(A5, na.rm = TRUE),
+    A5sd = sd(A5, na.rm = TRUE),
+    A6mean = mean(A6, na.rm = TRUE),
+    A6median = median(A6, na.rm = TRUE),
+    A6sd = sd(A6, na.rm = TRUE),
+    A7mean = mean(A7, na.rm = TRUE),
+    A7median = median(A7, na.rm = TRUE),
+    A7sd = sd(A7, na.rm = TRUE),
+    A8mean = mean(A8, na.rm = TRUE),
+    A8median = median(A8, na.rm = TRUE),
+    A8sd = sd(A8, na.rm = TRUE),
+    A9mean = mean(A9, na.rm = TRUE),
+    A9median = median(A9, na.rm = TRUE),
+    A9sd = sd(A9, na.rm = TRUE),
+    A10mean = mean(A10, na.rm = TRUE),
+    A10median = median(A10, na.rm = TRUE),
+    A10sd = sd(A10, na.rm = TRUE),
+    A11mean = mean(A11, na.rm = TRUE),
+    A11median = median(A11, na.rm = TRUE),
+    A11sd = sd(A11, na.rm = TRUE),
+    A12mean = mean(A12, na.rm = TRUE),
+    A12median = median(A12, na.rm = TRUE),
+    A12sd = sd(A12, na.rm = TRUE),
+    A13mean = mean(A13, na.rm = TRUE),
+    A13median = median(A13, na.rm = TRUE),
+    A13sd = sd(A13, na.rm = TRUE),
+    A14mean = mean(A14, na.rm = TRUE),
+    A14median = median(A14, na.rm = TRUE),
+    A14sd = sd(A14, na.rm = TRUE),
+    A15mean = mean(A15, na.rm = TRUE),
+    A15median = median(A15, na.rm = TRUE),
+    A15sd = sd(A15, na.rm = TRUE))
+
+View(A.Restriction.Scores) # View outcomes
+
+R.Restriction.Scores<- combinedata %>% # Create a dataframe of outcomes so that they can all be easily viewed an exported
+  group_by(Preregistration_group)%>%
+  summarise(
+    n = n(),
+    R6mean = mean(R6, na.rm = TRUE),
+    R6median = median(R6, na.rm = TRUE),
+    R6sd = sd(R6, na.rm = TRUE))
+
+View(R.Restriction.Scores)# View outcomes
+
+###### Compute more detailed descriptives and percentages for each ****gambling preregistration restriction score*** AND statistical comparisons between gambling and multidiscplinary preregistrations
+
+#T1
+summary(data$T1) # Mean, median, range for the item scores.
+table(data$T1) # Provides the total number of each score (0-3), from which the mode can be extracted.
+100*(table(data$T1) / sum(table(data$T1))) # Calculates proportion/percentage for each score.
+# Compare gambling and multidiscplinary preregistrations median restriction score using a Wilcoxon ranked sum test
+wilcox.test(T1 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+#T2
+summary(data$T2)
+table(data$T2) 
+100*(table(data$T2)/ sum(table(data$T2)))
+
+wilcox.test(T2 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+#D1
+summary(data$D1)
+table(data$D1) 
+100*(table(data$D1)/ sum(table(data$D1)))
+
+wilcox.test(D1 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+#D2
+summary(data$D2)
+table(data$D2) 
+100*(table(data$D2)/ sum(table(data$D2)))
+
+wilcox.test(D2 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#D3
+summary(data$D3)
+table(data$D3) 
+100*(table(data$D3)/ sum(table(data$D3)))
+
+wilcox.test(D3 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#D4
+summary(data$D4)
+table(data$D4) 
+100*(table(data$D4)/ sum(table(data$D4)))
+
+wilcox.test(D4 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#D5
+summary(data$D5)
+table(data$D5) 
+100*(table(data$D5)/ sum(table(data$D5)))
+
+wilcox.test(D5 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#D6
+summary(data$D6)
+table(data$D6) 
+100*(table(data$D6)/ sum(table(data$D6)))
+
+wilcox.test(D6 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#D7
+summary(data$D7)
+table(data$D7) 
+100*(table(data$D7)/ sum(table(data$D7)))
+
+wilcox.test(D7 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#C1
+summary(data$C1)
+table(data$C1) 
+100*(table(data$C1)/ sum(table(data$C1)))
+
+wilcox.test(C1 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#C2
+summary(data$C2)
+table(data$C2) 
+100*(table(data$C2)/ sum(table(data$C2)))
+
+wilcox.test(C2 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#C3
+summary(data$C3)
+table(data$C3) 
+100*(table(data$C3)/ sum(table(data$C3)))
+
+wilcox.test(C3 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#C4
+summary(data$C4)
+table(data$C4) 
+100*(table(data$C4)/ sum(table(data$C4)))
+
+wilcox.test(C4 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A1
+summary(data$A1)
+table(data$A1) 
+100*(table(data$A1)/ sum(table(data$A1)))
+
+wilcox.test(A1 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A2
+summary(data$A2)
+table(data$A2) 
+100*(table(data$A2)/ sum(table(data$A2)))
+
+wilcox.test(A2 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+#A3
+summary(data$A3)
+table(data$A3) 
+100*(table(data$A3)/ sum(table(data$A3)))
+
+wilcox.test(A3 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A4
+summary(data$A4)
+table(data$A4) 
+100*(table(data$A4)/ sum(table(data$A4)))
+
+wilcox.test(A4 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A5
+summary(data$A5)
+table(data$A5) 
+100*(table(data$A5)/ sum(table(data$A5)))
+
+wilcox.test(A5 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A6
+summary(data$A6)
+table(data$A6) 
+100*(table(data$A6)/ sum(table(data$A6)))
+
+wilcox.test(A6 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A7
+summary(data$A7)
+table(data$A7) 
+100*(table(data$A7)/ sum(table(data$A7)))
+
+wilcox.test(A7 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A8
+summary(data$A8)
+table(data$A8) 
+100*(table(data$A8)/ sum(table(data$A8)))
+
+wilcox.test(A8 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A9
+summary(data$A9)
+table(data$A9) 
+100*(table(data$A9)/ sum(table(data$A9)))
+
+wilcox.test(A9 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A10
+summary(data$A10)
+table(data$A10) 
+100*(table(data$A10)/ sum(table(data$A10)))
+
+wilcox.test(A10 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A11
+summary(data$A11)
+table(data$A11) 
+100*(table(data$A11)/ sum(table(data$A11)))
+
+wilcox.test(A11 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A12
+summary(data$A12)
+table(data$A12) 
+100*(table(data$A12)/ sum(table(data$A12)))
+
+wilcox.test(A12 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A13
+summary(data$A13)
+table(data$A13) 
+100*(table(data$A13)/ sum(table(data$A13)))
+
+wilcox.test(A13 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A14
+summary(data$A14)
+table(data$A14) 
+100*(table(data$A14)/ sum(table(data$A14)))
+
+wilcox.test(A14 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#A15
+summary(data$A15)
+table(data$A15) 
+100*(table(data$A15)/ sum(table(data$A15)))
+
+wilcox.test(A15 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+#R6
+summary(data$R6)
+table(data$R6) 
+100*(table(data$R6)/ sum(table(data$R6)))
+
+wilcox.test(R6 ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+# Calculate the summed mean restriction score for each pre-reg (add a new column that contains these socres)
+combinedata$Prereg.Restriction.Score <- rowMeans(combinedata[5:33], na.rm = T)
+View(combinedata)
+summarySE(combinedata, measurevar = "Prereg.Restriction.Score", groupvars = "Pre-registration_group") # Compute mean +  sd of Registration Restriction score per group
+
+# Compare gambling and multidiscplinary preregistrations summed mean restriction score using a Wilcoxon ranked sum test
+wilcox.test(Prereg.Restriction.Score ~ Preregistration_group,
+            data = combinedata,
+            alternative = "greater",
+            paired = FALSE, correct = TRUE,
+            conf.int = TRUE, conf.level = 0.95)
+
+
+############################################################
+
+#descriptive statistics for each **deviation** score (dev_score)(gambling preregistrations only)
+
+#T1
+summary(data$T1_dev_score)
+table(data$T1_dev_score) #provides number total number of each score, from which the mode can be extracted.
+100*(table(data$T1_dev_score) / sum(table(data$T1_dev_score))) # Calculates proportion/percentage for each score.
+
+#T2
+summary(data$T2_dev_score)
+table(data$T2_dev_score)
+100*(table(data$T2_dev_score) / sum(table(data$T2_dev_score)))
+
+#D1
+summary(data$D1_dev_score)
+table(data$D1_dev_score)
+100*(table(data$D1_dev_score) / sum(table(data$D1_dev_score)))
+
+#D2
+summary(data$D2_dev_score)
+table(data$D2_dev_score)
+100*(table(data$D2_dev_score) / sum(table(data$D2_dev_score)))
+
+#D3
+summary(data$D3_dev_score)
+table(data$D3_dev_score)
+100*(table(data$D3_dev_score) / sum(table(data$D3_dev_score)))
+
+#D4
+summary(data$D4_dev_score)
+table(data$D4_dev_score)
+100*(table(data$D4_dev_score) / sum(table(data$D4_dev_score)))
+
+#D5
+summary(data$D5_dev_score)
+table(data$D5_dev_score)
+100*(table(data$D5_dev_score) / sum(table(data$D5_dev_score)))
+
+
+#D6
+summary(data$D6_dev_score)
+table(data$D6_dev_score)
+100*(table(data$D6_dev_score) / sum(table(data$D6_dev_score)))
+
+
+#D7
+summary(data$D7_dev_score)
+table(data$D7_dev_score)
+100*(table(data$D7_dev_score) / sum(table(data$D7_dev_score)))
+
+
+#C1
+summary(data$C1_dev_score)
+table(data$C1_dev_score)
+100*(table(data$C1_dev_score) / sum(table(data$C1_dev_score)))
+
+
+#C2
+summary(data$C2_dev_score)
+table(data$C2_dev_score)
+100*(table(data$C2_dev_score) / sum(table(data$C2_dev_score)))
+
+
+#C3
+summary(data$C3_dev_score)
+table(data$C3_dev_score)
+100*(table(data$C3_dev_score) / sum(table(data$C3_dev_score)))
+
+
+#C4
+summary(data$C4_dev_score)
+table(data$C4_dev_score)
+100*(table(data$C4_dev_score) / sum(table(data$C4_dev_score)))
+
+
+#A1
+summary(data$A1_dev_score)
+table(data$A1_dev_score)
+100*(table(data$A1_dev_score) / sum(table(data$A1_dev_score)))
+
+
+#A2
+summary(data$A2_dev_score)
+table(data$A2_dev_score)
+100*(table(data$A2_dev_score) / sum(table(data$A2_dev_score)))
+
+
+#A3
+summary(data$A3_dev_score)
+table(data$A3_dev_score)
+100*(table(data$A3_dev_score) / sum(table(data$A3_dev_score)))
+
+
+#A4
+summary(data$A4_dev_score)
+table(data$A4_dev_score)
+100*(table(data$A4_dev_score) / sum(table(data$A4_dev_score)))
+
+#A5
+summary(data$A5_dev_score)
+table(data$A5_dev_score)
+100*(table(data$A5_dev_score) / sum(table(data$A5_dev_score)))
+
+#A6
+summary(data$A6_dev_score)
+table(data$A6_dev_score)
+100*(table(data$A6_dev_score) / sum(table(data$A6_dev_score)))
+
+
+#A7
+summary(data$A7_dev_score)
+table(data$A7_dev_score)
+100*(table(data$A7_dev_score) / sum(table(data$A7_dev_score)))
+
+
+#A8
+summary(data$A8_dev_score)
+table(data$A8_dev_score)
+100*(table(data$A8_dev_score) / sum(table(data$A8_dev_score)))
+
+
+#A9
+summary(data$A9_dev_score)
+table(data$A9_dev_score)
+100*(table(data$A9_dev_score) / sum(table(data$A9_dev_score)))
+
+
+#A10
+summary(data$A10_dev_score)
+table(data$A10_dev_score)
+100*(table(data$A10_dev_score) / sum(table(data$A10_dev_score)))
+
+
+#A11
+summary(data$A11_dev_score)
+table(data$A11_dev_score)
+100*(table(data$A11_dev_score) / sum(table(data$A11_dev_score)))
+
+
+#A12
+summary(data$A12_dev_score)
+table(data$A12_dev_score)
+100*(table(data$A12_dev_score) / sum(table(data$A12_dev_score)))
+
+
+#A13
+summary(data$A13_dev_score)
+table(data$A13_dev_score)
+100*(table(data$A13_dev_score) / sum(table(data$A13_dev_score)))
+
+
+#A14
+summary(data$A14_dev_score)
+table(data$A14_dev_score)
+100*(table(data$A14_dev_score) / sum(table(data$A14_dev_score)))
+
+
+#A15
+summary(data$A15_dev_score)
+table(data$A15_dev_score)
+100*(table(data$A15_dev_score) / sum(table(data$A15_dev_score)))
+
+
+#R6
+summary(data$R6_dev_score)
+table(data$R6_dev_score)
+100*(table(data$R6_dev_score) / sum(table(data$R6_dev_score)))
+
+
+# Calculate the mean deviation score for each pre-reg (add a new column that contains these socres)
+data$mean.prereg.dev.score <- rowMeans(data[34:62], na.rm = T) # Isolate relevant columns
+data$mean.prereg.dev.score # View mean pre-reg deviation scores individually (optional)
+View(data) 
+
+summary(data$mean.prereg.dev.score)
+sd(data$mean.prereg.dev.score)
+(data$mean.prereg.dev.score)
