@@ -1,0 +1,44 @@
+# Script to calculate the Benjamini-Hochberg critical values used to reduce the false discovery rate.
+
+# *Calculated as: (i/m)Q, where:
+# i = the rank of the p value (ordered from smallest to largest), 
+# m = the total number of tests undertaken,  
+# Q = the FDR we select (set at .05 or 5%).
+
+
+# Calculate all values and create a dataframe of these values:
+B.H.criticalvalues<- data.frame(c(1/30 * 0.05,
+2/30 * 0.05,
+3/30 * 0.05,
+4/30 * 0.05,
+5/30 * 0.05,
+6/30 * 0.05,
+7/30 * 0.05,
+8/30 * 0.05,
+9/30 * 0.05,
+10/30 * 0.05,
+11/30 * 0.05,
+12/30 * 0.05,
+13/30 * 0.05,
+14/30 * 0.05,
+15/30 * 0.05,
+16/30 * 0.05,
+17/30 * 0.05,
+18/30 * 0.05,
+19/30 * 0.05,
+20/30 * 0.05,
+21/30 * 0.05,
+22/30 * 0.05,
+23/30 * 0.05,
+24/30 * 0.05,
+25/30 * 0.05,
+26/30 * 0.05,
+27/30 * 0.05,
+28/30 * 0.05,
+29/30 * 0.05,
+30/30 * 0.05))
+
+
+View(B.H.criticalvalues) # View computed critical values
+
+write.csv(B.H.criticalvalues, file = "Data_files/B.H.criticalvalues.csv") # Create a CSV file from the dataframe so that figures can be easily copied into a table
