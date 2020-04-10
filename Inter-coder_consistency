@@ -1,0 +1,25 @@
+# Rob's test data for Krippendorf's Alpha analysis
+# interrater reliability on 3-3-2020
+
+install.packages("irr")
+
+exampledata <- read.csv("Data_files/fictitious_intercoder_data_Eric_edits_3-3-2020.csv", 
+                     header=TRUE)
+
+View(exampledata)
+
+library(irr)
+
+# Run Fleiss' Kappa
+
+kappam.fleiss(exampledata, exact = FALSE, detail = FALSE)
+
+# Transpose table to allow Krippendorff's Alpha analysis
+
+exampledata_transposed <- t(exampledata)
+View(exampledata_transposed)
+str(exampledata_transposed)
+
+# Run Krippendorff's Alpha
+
+kripp.alpha(exampledata_transposed, method = c("ordinal"))
