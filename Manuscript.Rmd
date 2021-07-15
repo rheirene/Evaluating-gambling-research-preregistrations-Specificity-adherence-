@@ -68,14 +68,14 @@ author:
      
 affiliation:  
   - id            : "1"
-    institution   : "School of Psychology, Brain & Mind Centre, Science Faculty, University of Sydney, Australia"
+    institution   : "School of Psychology, Brain & Mind Centre, University of Sydney, Australia"
   - id            : "2"
     institution   : "Division on Addiction, Harvard Medical School, USA"
   - id            : "3"
     institution   : "Methods and Statistics Department, Tilburg University, Netherlands"
 
 authornote: | 
-    All materials associated with this study can be accessed via this project's Open Science Framework page, including the preregistration, scoring protocols, raw datasets, analysis scripts, and the *R* Markdown script used to create this manuscript: https://osf.io/n8rw3/
+    All materials associated with this study can be accessed on our Open Science Framework page, including the preregistration, scoring protocols, raw datasets, analysis scripts, and the RMarkdown script used to create this manuscript: https://osf.io/n8rw3/
 
 # note: "\\clearpage" # Add this in when using the "man" output style as this ensures the Author note starts clean on a new page
 
@@ -180,6 +180,12 @@ load(file = "Outcomes.RData") # LOAD ALL RESULTS/OUTCOMES FROM R ENVIRONMENT
 # 
 # spell_check_files("Manuscript.pdf", ignore = character(), lang = "en_US")
 ```
+
+
+> Submitted to Meta-Psychology. Participate in open peer review by commenting through hypothes.is directly on this preprint. The full editorial process of all articles under review at Meta-Psychology can be found following this link: https://tinyurl.com/mp-submissions
+
+> You will find this preprint by searching for the first author's name.
+
 
 \newpage
 
@@ -1222,8 +1228,8 @@ A preregistered study is not necessarily better, more rigorous, or more impactfu
 ## Acknowledgements
 The research team would like to thank Dr Dylan Pickering and Thomas Swanton for their assistance with reviewing our preregistration specificity scores. We thank Dr Nicola Black for providing constructive feedback on an earlier version of this article and Su Jeong Cho for her assistance with administration tasks. 
 
-## Funding sources
-Funding for this project was provided by the Division on Addiction to the University of Sydney via a research contract between the Division on Addiction and GVC Holdings, PLC. GVC Holdings is a large international gambling and online gambling operator. GVC had no involvement with the development of our research questions or protocol or development of this preregistration. 
+## Conflict of Interest and Funding
+Funding for this project was provided by the Division on Addiction to the University of Sydney via a research contract between the Division on Addiction and GVC Holdings, PLC. GVC Holdings is a large international gambling and online gambling operator. GVC had no involvement with the development of our research questions or protocol or development of this preregistration. The authors declare no conflicts of interest in relation to this study. 
 
 ## Disclosures
 The authors declare that there are no competing interests associated with this work. There were no constraints on publishing the findings of this study and we did not require approval from Entain PLC (formerly GVC Holdings), PLC to disseminate any of the findings.
