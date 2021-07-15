@@ -1,13 +1,13 @@
 ---
 title: Data analysis process & outcomes
 author: "Rob Heirene"
-date: "07/12/2020"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
 # --------------------------------------------------------------------------------
 
 ## Lay introduction
-This html document is the direct output of computer code from the statistical programming software R Studio. It presents the original code used to undertake the analyses in the below-titled study alongside text describing the analysis process:
+This html document is the direct output of computer code from the statistical programming software RStudio. It presents the original code used to undertake the analyses in the below-titled study, alongside text describing the analysis process:
 
 <br>
 <center>
@@ -15,10 +15,10 @@ This html document is the direct output of computer code from the statistical pr
 </center>
 <br>
 
-Following each chunk of analysis code are the outcomes produced by the written the code, which are produced by R Studio directly from the underlying code and therefore are not editable by the research team, leading to the transparent presentation of all findings from the study. 
+Following each chunk of analysis code are the outcomes produced by the written  code, which are produced by RStudio directly from the underlying code and therefore are not editable by the research team, leading to the transparent presentation of all findings from the study. 
 
 ## Technical introduction
-This document presents the analysis code used to pre-process (e.g., combine datasets, organise data, and rename variables and values) and analyse data for the above-titled study. The code is annotated and the resulting outputs are included where appropriate.
+This document presents the analysis code used to preprocess (e.g., combine datasets, organise data, and rename variables and values) and analyse data for the above-titled study. The code is annotated and the resulting outputs are included where appropriate.
 
 The RMarkdown script underlying this document can be accessed on this project's Open Science Framework (OSF) page:
 
@@ -117,7 +117,7 @@ Before looking at the data, start by plotting figure 1: a flowchart of the prere
 
 # pdf(file="fig1_flowchart.pdf",
 #     width = 6.5,
-#     height = 7.7) # I actually saved this manually in the plot viewer using these dimensions, but this would directly save the plot output (I did it manually as the scales seemed to go astray when saving like this)
+#     height = 7.7) # I actually saved this manually in the plot viewer using these dimensions, but this would directly save the plot output (I did it manually, as the scales seemed to go astray when saving like this)
 
 TxtGp <- getOption("sans", default = gpar(fontfamily = "sans", fontsize = 8))
 
@@ -276,7 +276,7 @@ box11
 connectGrob(box8, box9, type = "vertical")
 connectGrob(box4, box9, type = "vertical")
 
-# The above plot might not print correctly here but it will do in the manuscript.
+# The above plot might not print correctly here, but it will do in the manuscript.
 # dev.off() # needed if saving via this code
 ```
 
@@ -290,7 +290,7 @@ A note here: In our preregistration we called the previous, related study with w
 
 # https://osf.io/fgc9k/
    
-# 2. Load the RData file into workspace
+# 2. Load the RData file into workspace:
 load(file = "Data/Data from Bakker et al./Workspace_prereg_study_final_analyses_FINAL.RData") # LOAD ALL RESULTS/OUTCOMES FROM R ENVIRONMENT
 
 # 3. Select the relevant object and write into a readable csv file for easy future access:
@@ -322,7 +322,7 @@ names(Bakkerdata.imputed) # Check the labels contained in the dataset
 ###### Load and read our master copy for the gambling preregistration scoring dataset:
 data<- read.csv("Data/Scoring_guides_final/Scoring_framework_RH_Master_copy.csv") 
 # View(data)
-head(data) # Check the data have loaded correctly
+head(data) # Check the data has loaded correctly
 ```
 
 ### Make our dataset usable
@@ -331,14 +331,14 @@ To do this we need to:
 - Remove all rows containing notes on the coding process and the one study that was removed mid-coding
 - Remove the empty columns and rows
 - Make sure all of the columns are in the correct format/class required for analyses
-- Convert "99" scores to "NA" (we need to do this for restrictions scores firstly [Q1:Q22] as there are multiple missing rows within the adherence scoring columns because many preregistrations did not have an associated paper/preprint and “99” values help distinguish actual NA answers from missing values)
+- Convert "99" scores to "NA" (we need to do this for specificity scores firstly [Q1:Q22], as there are multiple missing rows within the adherence scoring columns because many preregistrations did not have an associated paper/preprint and “99” values help distinguish actual NA answers from missing values)
 
 ```{r message=FALSE, warning=FALSE, results=FALSE}
 
-data_temp <- data[2:108,1:86] # There are numerous empty columns + rows after the data that require removing
+data_temp <- data[2:108,1:86] # There are numerous empty columns and rows after the data in the spreadsheet that require removing
 data_final<- data_temp %>%
   filter(Preregistration_number != "Notes on pre-reg above" & 
-           Preregistration_number != "EXCLUDED MID-STUDY AS NO HYPOTHESES") %>% # Exclude columns with notes and irrelevant registration
+           Preregistration_number != "EXCLUDED MID-STUDY AS NO HYPOTHESES") %>% # Exclude columns with notes and an irrelevant registration
   mutate(across(c(Q1:Q22), na_if, 99)) # Convert 99 values to NAs where appropriate.
 
 # Find all of the specificity columns containing numeric data:
@@ -356,7 +356,7 @@ names(data_final) # Check the labels contained in the dataset
 The following outcomes relate to the **specificity** of gambling researchers' preregistrations, or the extent to which they clearly specify all relevant aspects of the planned study according to our Researcher Degrees of Freedom (RDoF) scoring protocol (we use the term *specificity* scores here for clarity, but the original authors of this scoring protocol used the term *restriction* scores.)
 
 ### Question-level descriptive scores
-Outcomes represent the scores given to each preregistration at the level of the questions (i.e., the exact score given for each question) and have not been coded in relation to the specific Researcher Degrees of Freedom (RDoF) items from Wicherts et al. (2016) as originally done by Bakker et al. (2018) who developed the scoring protocol we used. As stated in our transparent changes document (https://osf.io/6fk87/), we believe providing outcomes at this level provides more information than when the scores are converted to RDoF items due to the dependency involved in this method of scoring. 
+Outcomes represent the scores given to each preregistration at the level of the questions (i.e., the exact score given for each question) and have not been coded in relation to the specific Researcher Degrees of Freedom (RDoF) items from Wicherts et al. (2016), as originally done by Bakker et al. (2018), who developed the scoring protocol we used. As stated in our transparent changes document (https://osf.io/6fk87/), we believe providing outcomes at this level provides more information than when the scores are converted to RDoF items, due to the dependency involved in this method of scoring. 
 
 Let's start by computing some easily readable descriptive statistics for each *specificity* score for the *gambling* preregistrations.
 ```{r message=FALSE, result = 'asis'}
@@ -392,30 +392,30 @@ Specificity_item_nos <- as.factor(c("Q1", "Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9
                                 "Q13","Q14","Q15","Q16","Q17","Q18","Q19","Q20","Q21a","Q21b","Q22"))
 
 #  Create a character vector that provides summary versions of the questions from the specificity scoring guide:
-Summarised_question <- as.factor(c("Is at least one hypothesis specified such that it is clear what are the independent and dependent variables?",
+Summarised_question <- as.factor(c("Is at least one hypothesis specified such that it is clear what the independent and dependent variables are?",
                                "Is the direction of the hypothesis specified?",
                                "Does the text explicitly exclude the possibility that at least one of the manipulated variables specified in the hypothesis will be omitted in the test of the hypothesis?",
                                "Does the text specify exactly how the manipulated variable will be used in the analysis to test the hypothesis?",
                                "Does the text explicitly exclude the possibility that at least one other variable (e.g. a covariate) is included in the analysis testing the hypothesis?",
                                "Does the text specify exactly which measurement instrument will be used as the main outcome variable?",
                                "Does the text explicitly specify that the confirmatory analysis section of the paper will not include another dependent variable than the ones specified in all hypotheses? ",
-                               "Does the pre-registration indicate inclusion and exclusion criteria in selecting data points used in the analysis?",
+                               "Does the preregistration indicate inclusion and exclusion criteria in selecting data points used in the analysis?",
                                "Is a power analysis reported?",
                                "Is the sampling protocol outlined, including the exact number of participants, recruitment strategy, eligibility criteria, and stopping rules?",
                                "Is it specified how randomization is implemented?",
-                               "Does the pre-registration describe procedures to blind participants to and/or experimenters to conditions?",
-                               "Does the pre-registration include protocols concerning coding of data, discarding of cases, or correction of scores during data collection?",
-                               "Does the pre-registration indicate how the study deals with incomplete or missing data?",
-                               "Does the pre-registration offer a protocol for pre-processing the data when required (e.g., smoothed, corrected for motion and other artifacts)?",
-                               "Does the pre-registration indicate how to test for violations of statistical assumptions and what to do with possible violations?",
-                               "Does the pre-registration indicate how to detect outliers and how they should be dealt with?",
+                               "Does the preregistration describe procedures to blind participants to and/or experimenters to conditions?",
+                               "Does the preregistration include protocols concerning coding of data, discarding of cases, or correction of scores during data collection?",
+                               "Does the preregistration indicate how the study deals with incomplete or missing data?",
+                               "Does the preregistration offer a protocol for preprocessing the data when required (e.g., smoothed, corrected for motion and other artifacts)?",
+                               "Does the preregistration indicate how to test for violations of statistical assumptions and what to do with possible violations?",
+                               "Does the preregistration indicate how to detect outliers and how they should be dealt with?",
                                "Is the method used to measure the primary outcome variable(s) fully described?",
                                "Are the methods used to measure non-manipulated independent variable(s) fully described?",
                                
-                               "Does the pre-registration specify the statistical model(s) that will be used to test the hypothesis (e.g., MANOVA, logistic regression, SEM)?",
-                               "Does the pre-registration indicate details of the estimation technique used to estimate the statistical model and to compute standard errors?",
-                               "Does the pre-registration specify which statistical software package and version is used for running the analyses?",
-                               "Does the pre-registration indicate the inference criteria (e.g., Bayes factors, Alpha level, sidedness of the test, corrections for multiple testing)?"))
+                               "Does the preregistration specify the statistical model(s) that will be used to test the hypothesis (e.g., MANOVA, logistic regression, SEM)?",
+                               "Does the preregistration indicate details of the estimation technique used to estimate the statistical model and to compute standard errors?",
+                               "Does the preregistration specify which statistical software package and version is used for running the analyses?",
+                               "Does the preregistration indicate the inference criteria (e.g., Bayes factors, Alpha level, sidedness of the test, corrections for multiple testing)?"))
 ```
 <br>
 
@@ -434,7 +434,7 @@ kable(Specificity_item_nos %>% bind_cols(Summarised_question, Mean, SD, Median, 
    caption = '<b>Summary scores for each specificity question</b>', format = 'html', digits = 2) %>%
    # col.names = c("Operator", "Group","n")) %>%
    kable_classic(full_width = F, html_font = "Cambria") %>%
-  footnote(general = "Using the RDoF scoring protocol each preregistration is given a value between 0 and 3 for each question (although,some questions can only be scored 0, 1, or 3, and some can only be scored 0 or 3). A value of 0 indicates no specification at all, 1 indicates some specification but lacking detail, 2 indicates full specification of all relevant details, and a score of 3 requires full specification and an acknowledgement by the authors that they will not deviate from their preregisterd plan.",
+  footnote(general = "Using the RDoF scoring protocol, each preregistration is given a value between 0 and 3 for each question (although, some questions can only be scored 0, 1, or 3, and some can only be scored 0 or 3). A value of 0 indicates no specification at all, 1 indicates some specification but lacking detail, 2 indicates full specification of all relevant details, and a score of 3 requires full specification and an acknowledgement by the authors that they will not deviate from their preregisterd plan.",
            footnote_as_chunk = T)
 ```
 <br>
@@ -474,7 +474,7 @@ count_data$Question <- as.factor(count_data$Question)
 
 count_data$Question<- factor(count_data$Question,
                                 c("Q1", "Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10","Q11","Q12",
-                                "Q13","Q14","Q15","Q16","Q17","Q18","Q19","Q20","Q21a","Q21b","Q22")) # Re-order factor levels
+                                "Q13","Q14","Q15","Q16","Q17","Q18","Q19","Q20","Q21a","Q21b","Q22")) # Reorder factor levels
 
 count_data %>%
   ggplot(aes(x=Score , y= reorder(Question, desc(Question)), fill = Question)) +
@@ -640,7 +640,7 @@ Summarised_rdof_item <- as.factor(c("Conducting exploratory research without any
                                     "Correcting, coding, or discarding data during data collection in non-blinded manner",
                                     "Determining the data collection stopping rule on the basis of desired results or intermediate significance testing",
                                     "Choosing between different options of dealing with incomplete or missing data on ad hoc grounds",
-                                    "Specifying pre-processing of data (e.g., cleaning, normalization, smoothing, and motion correction) in an ad hoc manner", 
+                                    "Specifying preprocessing of data (e.g., cleaning, normalization, smoothing, and motion correction) in an ad hoc manner", 
                                     
                                     "Deciding how to deal with violations of statistical assumptions in an ad hoc manner",
                                     "Deciding on how to deal with outliers in an ad hoc manner",
@@ -676,7 +676,7 @@ kable(rdof_items %>% bind_cols(Summarised_rdof_item, Mean2, SD2, Median2, Min2, 
    digits = 2) %>%
    # col.names = c("Operator", "Group","n")) %>%
    kable_classic(full_width = F, html_font = "Cambria") %>%
-  footnote(general = "Using the RDoF scoring protocol each preregistration is score a value between 0 and 3 for each question (although, question 1, 2, 6, and 15 can only be scored 0, 2, or 3; and questions 3, 5, and 7 can only be scored 0 or 3). A value of 0 indicates no specification at all, 1 indicates some specification but lacking detail, 2 indicates full specification of all relevant details, and a score of 3 requires full specification and an acknowledgement by the authors that they will not deviate from their preregisterd plan.",
+  footnote(general = "Using the RDoF scoring protocol, each preregistration is scored a value between 0 and 3 for each question (although, question 1, 2, 6, and 15 can only be scored 0, 2, or 3; and questions 3, 5, and 7 can only be scored 0 or 3). A value of 0 indicates no specification at all, 1 indicates some specification but lacking detail, 2 indicates full specification of all relevant details, and a score of 3 requires full specification and an acknowledgement by the authors that they will not deviate from their preregisterd plan.",
            footnote_as_chunk = T)
 ```
 <br>
@@ -866,18 +866,18 @@ print(NAcount2)
 Bakker et al. used imputed scores for their confirmatory analyses and we will do the same later on to account for the missing (i.e., NA) values, as per our preregistered plan.
 
 #### Removal of our preregistrations from the sample
-Let's have a look at how the gambling preregistration to compare once we remove the ones authored by us. Given that we have paid considerable attention to preregistration practices, I would assume we scored higher than other gambling researchers in regards to the specificity of the registration.
+Let's have a look at how the gambling preregistrations compare once we remove the ones authored by us. Given that we have paid considerable attention to preregistration practices, I would assume we scored higher than other gambling researchers in regards to the specificity of the registration.
 
-We have a dataset that contains a list of all the registrations we have authored. Let's load that and then use that to identify our registrations. We are still focusing RDoF item scores and not raw question scores.
+We have a dataset that contains a list of all the registrations we have authored. Let's load that and then use that to identify our registrations. We are still focusing on RDoF item scores and not raw question scores.
 ```{r message=FALSE, warning=FALSE}
 # Load and read dataset:
 list_of_authored_regs<- read.csv("Other_findings_records/list_of_present_author_preregs.csv") 
 
-# head(list_of_authored_regs) # Check the data have loaded correctly
+# head(list_of_authored_regs) # Check the data has loaded correctly
 
 list_of_reg_nos <- list_of_authored_regs %>% 
   select(Preregistration_number = Pre.reg..) %>% # Isolate the relevant registration nos. and make the label consistent with the main dataset
-  as_tibble() # Convert to so that we can see what class the column is
+  as_tibble() # Convert to tibble so that we can see what class the column is
 
 data_rdof_format$Preregistration_number <- as.numeric(data_rdof_format$Preregistration_number)  # Make class consistent 
 
@@ -896,7 +896,7 @@ data_rdof_format_items_excl_ours <- data_rdof_format %>%
   print()
 ```
 
-Removing our registrations leaves a sample of size of 36. Thus, at least one of our team was an author on 17 of the 53 registrations (32%). 
+Removing our registrations leaves a sample of size 36. Thus, at least one member of our team was an author on 17 of the 53 registrations (32%). 
 
 Now, let's wrangle the dataset without our registrations and produce another plot for comparison.
 ```{r message=FALSE, warning=FALSE, results = FALSE}
@@ -921,7 +921,7 @@ data_rdof_format_items_excl_ours_graph$RDoF_Item<- factor(data_rdof_format_items
                          "C2","C3","C4", "A1","A2",
                          "A3","A4","A5","A6","A7","A8",
                          "A9","A10","A11","A12", "A13","A14",
-                         "A15","R6")) # Re-order factor levels
+                         "A15","R6")) # Reorder factor levels
 
 p3 <- data_rdof_format_items_excl_ours_graph %>%
   ggplot(aes(x=Score , y= reorder(RDoF_Item, desc(RDoF_Item)), fill = RDoF_Item)) +
@@ -963,7 +963,7 @@ Calculate frequency of scores for each question relating to disclosures that we 
 - Are author conflicts of interest reported?
 - Are any restrictions (or lack thereof) on publishing the work reported?
 
-These questions were all scores as 0 (not reported) or 3 (reported):
+These questions were all scored as 0 (not reported) or 3 (reported):
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -1059,13 +1059,13 @@ kable(disclosure.specificity.scores.2,
 
 # Confirmatory analyses
 
-Pre-registered hypothesis:
+Preregistered hypothesis:
 
 - "*we hypothesise that preregistrations of gambling studies will restrict RDoF to a lesser extent (i.e., have lower scores on the RDoF checklist items) than the multidisciplinary sample of preregistrations.*"
 
-Pre-registered confirmatory analysis plan:
+Preregistered confirmatory analysis plan (note: we used the term "restriction scores" in our pre-reg but have decided to use "specificity scores" instead now as we believe this is more informative):
 
-- "*We will use one-tailed non-parametric Wilcoxon-Mann-Whitney analyses to test the hypothesis that preregistrations of gambling studies will restrict RDoF to a lesser extent (i.e., have lower restriction scores) than the multidisciplinary sample of preregistrations. The Wilcoxon-Mann-Whitney tests will compare differences in restriction scores between gambling preregistrations and the random sample (n = 53) of multidisciplinary preregistrations selected by Bakker et al. (2018). For restriction scores scored as “N.A.”, Bakker et al. used a two-way imputation procedure based on corresponding row and column means before the restriction scores between the two groups of preregistrations were compared. Before conducting our confirmatory analyses, we will employ the same procedure for gambling preregistrations that are given N.A. scores and the resulting imputed data will be compared with the imputed data for Bakker and colleagues’ 53 multidiscipline preregistrations.*"
+- "*We will use one-tailed non-parametric Wilcoxon-Mann-Whitney analyses to test the hypothesis that preregistrations of gambling studies will restrict RDoF to a lesser extent (i.e., have lower restriction scores) than the multidisciplinary sample of preregistrations. The Wilcoxon-Mann-Whitney tests will compare differences in restriction scores between gambling preregistrations and the random sample (n = 53) of multidisciplinary preregistrations selected by Bakker et al. (2018). For restriction scores scored as “N.A.”, Bakker et al. used a two-way imputation procedure based on corresponding row and column means before the restriction scores between the two groups of preregistrations were compared. Before conducting our confirmatory analyses, we will employ the same procedure for gambling preregistrations that are given N.A. scores and the resulting imputed data will be compared with the imputed data for Bakker and colleagues’ 53 multidisciplinary preregistrations.*"
 
 ### Imputation
 Start by imputing missing (i.e., NA) scores within the gambling dataset:
@@ -1074,7 +1074,7 @@ Start by imputing missing (i.e., NA) scores within the gambling dataset:
 
 data_rdof_format_items_mat<- as.matrix(data_rdof_format_items) #
 
-md.pattern(data_rdof_format_items_mat) #check how many missing values there are and where they are
+md.pattern(data_rdof_format_items_mat) #Check how many missing values there are and where they are
 
 # Imputation of missing values for gambling preregistration specificity scores. Copied directly from preregistered analysis script:
 for(i in 1:nrow(data_rdof_format_items_mat))
@@ -1103,14 +1103,14 @@ nrow(Bakkerdata.imputed)
 names(data_rdof_format)
 names(Bakkerdata.imputed)
 
-# Ah, it seems Bakker et al. didn't collect dates of registration for their sample so I'm going to manually find them on OSF and create a vector of these to add to the dataset:
+# It seems Bakker et al. didn't collect dates of registration for their sample, so I'm going to manually find them on OSF and create a vector of these to add to the dataset:
 
-Bakkerdata.imputed$Link # Extract the links to follow to find dates
+Bakkerdata.imputed$Link # Extract the links below to find dates
 
-# Well, after checking them it seems they were all registered during 2016. Let's create a vector for year then:
+# Well, after checking them, it seems they were all registered during 2016. Let's create a vector for year then:
 Year<- rep(2016, times = 52) # Create character vector
 
-# We need to add a pre-registration "type/format" column to Bakker et al.'s data so we can summarise the characteristics of both samples later:
+# We need to add a preregistration "type/format" column to Bakker et al.'s data so we can summarise the characteristics of both samples later:
 data_rdof_format$Registration.type.format # Check what labels we used so we can make them consistent
 Registration.type.format <- rep("OSF Preregistration", times = 52) # Create character vector for Bakker et al.'s sample
 
@@ -1231,17 +1231,17 @@ effect_sizes
 
 Let's see how specificity scores are affected by factors like author groups, the year of the registration and the type of template used.
 
-Let's add a grouping variable to the data set to compare registrations authored by at least one of our team vs. those remaining and calculate some summary stats:
+Let's add a grouping variable to the data set to compare registrations authored by at least one member of our team vs. those remaining and calculate some summary stats:
 
 ```{r message=FALSE, warning=FALSE, results = FALSE}
 
-author_group <- rep("ours", times = 17) # create label for our registrations
+author_group <- rep("ours", times = 17) # Create label for our registrations
 
 author_grouped_data_temp<- list_of_reg_nos %>% 
-  bind_cols(author_group) %>% # add label
+  bind_cols(author_group) %>% # Add label
   dplyr::rename(author_group = ...2) %>%
-  full_join(combineddata) %>% # merge with main dataset 
-  filter(Preregistration_group != "1") # isolate our sample
+  full_join(combineddata) %>% # Merge with main dataset 
+  filter(Preregistration_group != "1") # Isolate our sample
 
 author_grouped_data_temp$author_group[is.na(author_grouped_data_temp$author_group)] <- "not ours" # Replace missing values in our new column with a label to note that these registrations were not authored by one of us. 
 
@@ -1256,7 +1256,7 @@ author_group_summary_scores<- author_grouped_data_temp %>%
   print()
 ```
 
-Now simply calculate some brief summary values for our other comparisons:
+Now, simply calculate some brief summary values for our other comparisons:
 ```{r}
 # Year:
 year.summary.values <-combineddata %>% as_tibble() %>% 
@@ -1285,7 +1285,7 @@ template.summary.values <- combineddata %>% as_tibble() %>%
   print()
 ```
 
-### Plot these data
+### Plot this data
 
 Before developing raincloud plots we have to run the following code taken from the below sources:
 
@@ -1377,7 +1377,7 @@ fig3.1 <- combineddata %>%
   select(1:34,
          mean_score = "Mean score",
          36) %>%
-    filter(Preregistration_group == "2") %>% # focus on gambling registrations
+    filter(Preregistration_group == "2") %>% # Focus on gambling registrations
   mutate(Year = as.factor(Year)) %>%
   as_tibble() %>% 
 ggplot(mapping =  aes(x = Year, y = mean_score), fill = Year) +
@@ -1503,7 +1503,7 @@ table(Bakker_data_w_dates_final$year)
 
 # Our outcome says 51 were registered in 2016, but there are 52 in the sample.
 
-# Let's take a look a the year which doesn't have a date and check the link
+# Let's take a look at the year which doesn't have a date and check the link
 Bakker_data_w_dates_final %>% select(year, Preregistration_number, Link)
 
 # The link for no. 57 leads to a page that states: "The googledrive add-on containing Preregistration%20Outline_Social%20Message%20Framing.gdoc is no longer authorized."
@@ -1552,8 +1552,8 @@ no.hyp.confusions<- data_final %>% mutate(confusion = case_when(max_hyp > min_hy
   print()
 ```
 
-## Structure used in open ended registrations 
-Researchers using open ended templates to structure their registrations appear to have high specificity scores, but we remember from scoring that many of these may have used a standard template that was simply inserted into a word document. Let’s find all of those using an open-ended template and manually review them to see what type of structure they used.
+## Structure used in open-ended registrations 
+Researchers using open-ended templates to structure their registrations appear to have high specificity scores, but we remember from scoring that many of these may have used a standard template that was simply inserted into a word document. Let’s find all of those using an open-ended template and manually review them to see what type of structure they used.
 
 ```{r}
 table(data_final$Registration.type.format)
@@ -1581,7 +1581,7 @@ data_final %>%
 
 So, all but one (91%) used the OSF template in a word/pdf doc.
 
-## Do specifcity scores correlate?
+## Do specificity scores correlate?
 
 Note: We're using imputed data for these correlations.
 ```{r fig.align='center', fig.height=4, fig.width=4, message=TRUE, warning=FALSE}
@@ -1601,7 +1601,7 @@ data_rdof_format_imputed_summary_categories<-  data_rdof_format_items_imputed_df
 # Compute a correlation matrix
 Correlation <- round(cor(data_rdof_format_imputed_summary_categories, method = "spearman"), 2)
 
-# Visualize
+# Visualise
 ggcorrplot(Correlation, 
            # p.mat = cor_pmat(data_rdof_format_imputed_summary_categories2),
            hc.order = TRUE, 
@@ -1811,7 +1811,7 @@ Let's remove this pre-reg (no. 33) and remake the correlation plot.
 Remember: We're using imputed data for these correlations.
 ```{r fig.align='center', fig.height=4, fig.width=7, message=TRUE, warning=FALSE}
 
-# First provide summary scores for each area of specificity (this time without the outlier):
+# First, provide summary scores for each area of specificity (this time without the outlier):
 
 data_rdof_format_items_imputed_df_sans33 <- data_rdof_format_items_imputed_df[-33,] # Outlier removal
 
@@ -1829,7 +1829,7 @@ data_rdof_format_imputed_summary_categories_sans33<-  data_rdof_format_items_imp
 # Compute a correlation matrix (this time without the outlier):
 Correlation2 <- round(cor(data_rdof_format_imputed_summary_categories_sans33, method = "spearman"), 2)
 
-# Let's check we have the correct prereg (i.e., the outlier), by plotting one of the scatter graphs from earlier:
+# Let's check we have the correct pre-reg (i.e., the outlier), by plotting one of the scatter graphs from earlier:
 design_analysis_sans33 <-  ggplot(data_rdof_format_imputed_summary_categories_sans33, aes(x = Analyses, y = Design)) + 
   geom_point(aes(color = Analyses), size = 1.5) +
 scale_color_gradientn(colours = c("#33638DFF", "#35B779FF", "#FDE725FF"))+
@@ -1856,7 +1856,7 @@ design_analysis + design_analysis_sans33
 
 # Yes, it looks like we have removed the correct preregistration.
 
-# Now re-visualize all correlation coefficients sans the outlier:
+# Now re-visualise all correlation coefficients sans the outlier:
 pCor_sans33<- ggcorrplot(Correlation2, 
            # p.mat = cor_pmat(data_rdof_format_imputed_summary_categories2),
            hc.order = TRUE, 
@@ -1886,7 +1886,7 @@ pCor + pCor_sans33 +
   theme(plot.tag = element_text(size = 12, family = "Cormorant Garamond", face = "bold")) + 
   theme(text = element_text("Cormorant Garamond"))
 ```
-Well, looking at the above it doesn't seem like the outlier had much of an effect on the correlation coefficients and so we will keep it in the figures presented in the manuscript.
+Well, looking at the above, it doesn't seem like the outlier had much of an effect on the correlation coefficients and so we will keep it in the figures presented in the manuscript.
 
 <br><br>
 
@@ -1894,13 +1894,13 @@ Well, looking at the above it doesn't seem like the outlier had much of an effec
 
 # Preregistration adherence outcomes
 
-The following outcomes are all computed in an exploratory in nature and relate to gambling researchers' **adherence** to their preregistration.
+The following outcomes are all computed in an exploratory nature and relate to gambling researchers' **adherence** to their preregistration.
 
-First, let's make a usable dataset for this data. To do this we need to:
+First, let's make a usable dataset for this data. To do this, we need to:
 
-- Isolate all the pre-regs with associated pre-prints/papers
+- Isolate all the preregistrations with associated pre-prints/papers
 - Convert 99 scores to "NA" values.
-- Remove scores for the questions that are simply repeated so we provide only one response to each question.
+- Remove scores for the questions that are simply repeated, so we provide only one response to each question.
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -1947,7 +1947,7 @@ dev_score_counts_byitem<- data_adherence_and_reporting %>%
   pivot_wider(names_from = value, values_from = n)%>%
    select(key, "0", "1", "2", "3", "U(P)", "U(A)", "U(B)", "NA")
   
-dev_score_counts_byitem[is.na(dev_score_counts_byitem)] <- 0 # Replace missing values with 0 so it's clear that this score wasn't present for the relevant questions
+dev_score_counts_byitem[is.na(dev_score_counts_byitem)] <- 0 # Replace missing values with 0, so it's clear that this score wasn't present for the relevant questions
 
 dev_score_counts_byitem$key <- factor(dev_score_counts_byitem$key, levels =
                                 c("T1_dev_score",
@@ -1981,7 +1981,7 @@ dev_score_counts_byitem$key <- factor(dev_score_counts_byitem$key, levels =
   "A15_dev_score",
       "Dis1_dev_score",
       "Dis2__dev_score",
-      "Dis3__dev_score")) # Re-order factor levels for presentation later
+      "Dis3__dev_score")) # Reorder factor levels for presentation later
 
 dev_score_counts_byitem<- dev_score_counts_byitem[order(dev_score_counts_byitem$key),]
 
@@ -1996,18 +1996,18 @@ dev_score_counts_byitem <- dev_score_counts_byitem %>%
   mutate(key  = fct_recode(key,
                 "Are the hypotheses reported the same as in the preregistration?" = "T1_dev_score", 
                 "Is the direction of each hypothesis the same?" = "T2_dev_score",
-   "Are the manipulated independent variables operationalised in the same way stated in the protocol?" = "D1_dev_score",
-   "Are all variables included in analyses testing hypotheses consistent with the preregistered analysis plan?" = "D2_dev_score",
+   "Are the manipulated independent variables operationalised in the same way, stated in the protocol?" = "D1_dev_score",
+   "Are all variables included in analyses testing hypotheses, consistent with the preregistered analysis plan?" = "D2_dev_score",
    "Are dependent variables measured in the same way as stated in the preregistration?" = "D3_dev_score",
    "Are all dependent variables included in analyses reported in the preregistration?" = "D4_dev_score",
    "Are the criteria for including datapoints in analyses consistent?" = "D5_dev_score",
-   "Is the sample size involved in  analyses consistent with the outcomes of the power analysis reported in the preregistration?" = "D7_dev_score",
+   "Is the sample size involved in analyses consistent with the outcomes of the power analysis reported in the preregistration?" = "D7_dev_score",
      "Is the sampling protocol stated in the preregistration followed?" = "D7_dev_score",
      "Is the randomisation procedure used consistent with that reported in the preregistration?" = "C1_dev_score",
      "Is the blinding procedure used consistent with that reported in the preregistration?" = "C2_dev_score",
-     "Are the procedures used to code and manage data during the data collection process?" = "C3_dev_score",
+     "Are the procedures used to code and manage data during the data collection process consistent?" = "C3_dev_score",
    "Are the procedures used to deal with missing data consistent with those reported in the preregistration?" = "A1_dev_score",
-   "Are the procedures used to pre-process data consistent?" = "A2_dev_score",
+   "Are the procedures used to preprocess data consistent?" = "A2_dev_score",
    "Are the procedures used to test for statistical assumptions consistent?" = "A3_dev_score",
    "Are the procedures used to identify and deal with outliers consistent?" = "A4_dev_score",
    "Are the dependent variables scored in a way that is consistent?" = "A6_dev_score",
@@ -2015,7 +2015,7 @@ dev_score_counts_byitem <- dev_score_counts_byitem %>%
    "Are the independent variables used in primary analyses all the same?" = "A8_dev_score",
    "Are non-manipulated IVs operationalised in a way consistent with the preregistration?" = "A11_dev_score",
    "Are the statistical tests used to test hypotheses consistent?" = "A13_dev_score",
-   " Are the estimation techniques used to estimate the statistical model(s) consistent?" = "A14.1_dev_score",
+   "Are the estimation techniques used to estimate the statistical model(s) consistent?" = "A14.1_dev_score",
    "Was the statistical software used to conduct analyses consistent with the preregistered plan?" = "A14.2_dev_score",
    "Are the inference criteria used consistent?" = "A15_dev_score",
        "Are the funding sources reported the same as stated in the preregistration?" = "Dis1_dev_score",
@@ -2071,7 +2071,7 @@ kbl(dev_score_counts_byitem_htmltable, escape = F,
                  html_font = "Cambria") %>%
   add_header_above(c(" ", "Score$^1$" = 8)) %>%
     footnote(general = "We answered all questions in relation to the confirmatory, hypothesis tests.",
-             number = "Scoring system: 0 = Yes, consistent with preregistration—no deviation; 1 = No, deviation from preregistration made & declared by the authors & a justification for change is provided; 2 = No, deviation from preregistration made & declared, but no justification for deviation is provided; 3 = No, deviation made & not declared or justified by the authors; U = unable to determine due to lack of detail reported in preregistration [scored as U$^P$] (e.g., randomisation procedure not reported in preregistration but used in study) the article [U$^A$] (e.g., randomisation procedure described in preregistration not reported in the article) or both [U$^B$] (e.g., randomisation procedure not specified in either the pre-registration or article).",
+             number = "Scoring system: 0 = Yes, consistent with preregistration (no deviation); 1 = No, deviation from preregistration made & declared by the authors & a justification for change is provided; 2 = No, deviation from preregistration made & declared, but no justification for deviation is provided; 3 = No, deviation made & not declared or justified by the authors; U = Unable to determine due to lack of detail reported in preregistration [scored as U$^P$] (e.g., randomisation procedure not reported in preregistration, but used in study), the article [U$^A$] (e.g., randomisation procedure described in preregistration, but not reported in the article), or both [U$^B$] (e.g., randomisation procedure not specified in either the preregistration or article).",
            footnote_as_chunk = T)
 
 ```
@@ -2090,7 +2090,7 @@ filter_at(vars(T1_dev_score:Dis3__dev_score), any_vars(.>=1)) %>%
   nrow() %>% 
   print()
 
-# How many studies made a deviation from their registration that wasn't reported and explained/justified? We only need to select scores of "3" here as no studies were given a score of 2 (i.e., reported but not justified deviation):
+# How many studies made a deviation from their registration that wasn't reported and explained/justified? We only need to select scores of "3" here, as no studies were given a score of 2 (i.e., reported, but not justified deviation):
 
 total_undeclared_deviations<- data_adherence_and_reporting %>%
   as_tibble() %>%
@@ -2150,10 +2150,10 @@ data_adherence_scores_pivoted <- data_adherence_and_reporting %>%
                values_to = "Score") %>%
   dplyr::rename(year = Year.registered..registered..not.created.)
 
-# Calculate summary figures for score the of 3:
+# Calculate summary figures for the score of 3:
 summary_undeclared_deviations<- data_adherence_scores_pivoted %>%
   group_by(Preregistration_number) %>% 
-  filter(Score == 3|Score == 0 | Score == 1) %>% # need to include all studies but remove character values (all studies definitely had at least one of these)
+  filter(Score == 3|Score == 0 | Score == 1) %>% # Need to include all studies, but remove character values (all studies definitely had at least one of these)
   summarise(sum(Score == "3")) %>% 
   print(n=50) %>%
   dplyr::rename(no3scores = `sum(Score == "3")`) %>%
@@ -2166,7 +2166,7 @@ summary_undeclared_deviations<- data_adherence_scores_pivoted %>%
 # Did the number of 3 scores change over time:
 undeclared_deviations_over_time<- data_adherence_scores_pivoted %>%
   group_by(year) %>% 
-  filter(Score == 3|Score == 0 | Score == 1) %>% # need to include all studies but remove character values (all studies definitely had at least one of these)
+  filter(Score == 3|Score == 0 | Score == 1) %>% # Need to include all studies, but remove character values (all studies definitely had at least one of these)
   summarise(n = sum(Score == "3")) 
 
 # What about the percentage of studies making at least one undeclared deviation over time?
@@ -2199,10 +2199,10 @@ undeclared_deviations_over_time_summary<- data_adherence_and_reporting %>%
   mutate(Percentage = No.deviating.studies/Total.no.studies*100) %>% 
   print()
 
-# Calculate summary figures for score the of 1:
+# Calculate summary figures for the score of 1:
 summary_declared_deviations<- data_adherence_scores_pivoted %>%
   group_by(Preregistration_number) %>% 
-  filter(Score == 3| Score == 0 | Score == 1) %>% # need to include all studies but remove character values (all studies definitely had at least one of these)
+  filter(Score == 3| Score == 0 | Score == 1) %>% # Need to include all studies but remove character values (all studies definitely had at least one of these)
   summarise(sum(Score == "1")) %>% 
   dplyr::rename(no3scores = `sum(Score == "1")`) %>%
   summarise(mean = mean(no3scores),
@@ -2232,14 +2232,14 @@ study_reporting_quality <- data_adherence_and_reporting %>%
   mutate(Question  = fct_recode(Question,
                                 "Are data shared and accessible to all?" = "R1.1",
                                "Are the data analysis scripts shared and accessible?" = "R1.2",
-                               "Are the methods reported sufficiently to allow replication? Including all study materials used?" = "R2",
+                               "Are the methods reported sufficiently, to allow replication? Including all study materials used?" = "R2",
                                "Is the preregistration clearly mentioned and linked/signposted in the article and easily accessible?" = "R3",
                                 "Are any experiments that were preregistered not reported?" = "R4",
                                 "Does running the paper through statcheck highlight any potential statistical errors?"= "R5", 
                                 "Are any hypotheses reported that weren't stated in the preregistration?"= "R6"))
                                 
 
-study_reporting_quality[is.na(study_reporting_quality)] <- 0 # Replace missing values with 0 so it's clear that this score wasn't present for the relevant questions
+study_reporting_quality[is.na(study_reporting_quality)] <- 0 # Replace missing values with 0, so it's clear that this score wasn't present for the relevant questions
 
 kable(study_reporting_quality,
     caption = '<b>Summary of study reporting quality</b>', align = c("l","c","c","c"), format = 'html') %>%
@@ -2282,7 +2282,7 @@ Decision_errors_statcheck <-table(statcheck_outcomes$DecisionError) %>%
 
 Let's manually check these errors to see if statcheck has accurately detected the test statistic, df, and p values:
 
-- No errors in #3and5.
+- No errors in #3 and 5.
 - Decision error in #10-12: Checked and does NOT appear to be an error. Statcheck mistake in identifying the p-value correctly. 
 - Two errors in #10-12: Checked and ONE DOES and ONE DOES NOT appear to be an error. Statcheck mistake in identifying the p-value correctly on the latter.
 - Three errors in #23: Checked and DO appear to be errors.
