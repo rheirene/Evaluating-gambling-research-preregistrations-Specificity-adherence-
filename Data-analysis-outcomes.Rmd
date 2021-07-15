@@ -1,0 +1,2302 @@
+---
+title: Data analysis process & outcomes
+author: "Rob Heirene"
+date: "07/12/2020"
+output: html_document
+---
+# --------------------------------------------------------------------------------
+
+## Lay introduction
+This html document is the direct output of computer code from the statistical programming software R Studio. It presents the original code used to undertake the analyses in the below-titled study alongside text describing the analysis process:
+
+<br>
+<center>
+ **"Evaluating preregistration practices in the open science era: A case study of preregistered gambling studies**
+</center>
+<br>
+
+Following each chunk of analysis code are the outcomes produced by the written the code, which are produced by R Studio directly from the underlying code and therefore are not editable by the research team, leading to the transparent presentation of all findings from the study. 
+
+## Technical introduction
+This document presents the analysis code used to pre-process (e.g., combine datasets, organise data, and rename variables and values) and analyse data for the above-titled study. The code is annotated and the resulting outputs are included where appropriate.
+
+The RMarkdown script underlying this document can be accessed on this project's Open Science Framework (OSF) page:
+
+- https://osf.io/n8rw3/
+
+## Load packages & fonts
+Create function to check to see if packages are installed and install them if they are not, and then load them into the R session. From:
+
+- https://gist.github.com/stevenworthington/3178163#file-ipak-r-L1
+
+```{r message=FALSE, results = FALSE}
+# Create function:
+ipak <- function(pkg){
+    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+    if (length(new.pkg)) 
+        install.packages(new.pkg, dependencies = TRUE)
+    sapply(pkg, require, character.only = TRUE)
+}
+
+# Name relevant packages:
+packages <- c("MOTE",
+              "plyr",
+              "dplyr",
+              "knitr",
+              "Rmisc", 
+              "beepr",
+              "extrafont",
+              "extrafontdb",
+              "ggplot2",
+              "ggcorrplot",
+              "Gmisc",
+              "glue",
+              "htmlTable",
+              "grid",
+              "magrittr",
+              "forcats",
+              "sjmisc",
+              "data.table",
+              "tidyr",
+              "tibble",
+              "effsize",
+              # "lubridate",
+              "cowplot",
+              "readr",
+              "car",
+              "fmsb",
+              "purrr",
+              "scales",
+              "patchwork",
+              "multicon",
+              "ggridges",
+              "broom",
+              # "broom.mixed",
+              "ggstatsplot",
+              "ggsci",
+              "showtext",
+              "aod",
+              "ggpubr",
+              "rstatix",
+              "WRS2",
+              "lsr",
+              "BayesFactor",
+              "epitools",
+              "DescTools",
+              "mosaic",
+              "kableExtra",
+              "table1",
+              "mice",
+              "english",
+              "apa",
+              "gtable")
+
+# Load packages:
+ipak(packages)
+```
+
+Remove all objects from work space before starting:
+```{r}
+rm(list = ls())
+# unlink("Workspace_prereg_study_final_analyses_FINAL.RData")
+```
+
+Load relevant fonts for figures:
+```{r message = FALSE, results = FALSE}
+# font_add_google("Poppins")
+# font_add_google("EB Garamond")
+font_add_google("Cormorant Garamond")
+showtext_auto()
+```
+
+# --------------------------------------------------------------------------------
+# Selection process flowchart
+
+Before looking at the data, start by plotting figure 1: a flowchart of the preregistration identification and selection process:
+```{r fig.height=7.52, fig.width=6.6,fig.align = 'center', message=FALSE, warning=FALSE, results=FALSE}
+
+# pdf(file="fig1_flowchart.pdf",
+#     width = 6.5,
+#     height = 7.7) # I actually saved this manually in the plot viewer using these dimensions, but this would directly save the plot output (I did it manually as the scales seemed to go astray when saving like this)
+
+TxtGp <- getOption("sans", default = gpar(fontfamily = "sans", fontsize = 8))
+
+TxtGp2 <- getOption("sans", default = gpar(fontfamily = "sans", fontsize = 7))
+
+grid.newpage()
+
+prel_search <- "1st OSF search 
+(date: 2020-03-14)"
+
+
+box1 <-boxGrob(prel_search,
+               y = 0.95,
+               x = 0.35,
+        txt_gp = TxtGp,
+        box_gp = gpar(fill = "#E6E8EF"))
+
+Returned <- "Returned:
+N = 92"
+
+box2 <- boxGrob(Returned,
+               y = 0.8,
+               x = 0.35,
+                txt_gp = TxtGp)
+
+Excluded <- "EXCLUDED (N = 59):
+-not gambling = 34
+-review/trial = 7
+-update to pre-reg = 3
+-no information = 2
+-withdrawn = 1
+-a dataset = 1
+-a preprint = 1
+-duplicate = 5
+-no hypothesis = 5"
+
+box3 <- boxGrob(Excluded,
+               y = 0.70,
+               x = 0.13,
+               just = "left",
+                txt_gp = TxtGp2,
+        box_gp = gpar(col = "grey"))
+
+Included <- "Included in 
+study: N = 33"
+
+box4 <- boxGrob(Included,
+               y = 0.6,
+               x = 0.35,
+                txt_gp = TxtGp)
+
+connectGrob(box1, box2, "vertical")
+connectGrob(box2, box4, "vertical")
+connectGrob(box2, box3, "-")
+box1
+box2
+box3
+box4
+
+# Fix the thick looking "l"s when the pdf renders:
+#   https://www.pixelportal.com.au/pixel-portal-blog/adobe_acrobat_showing_thick_l_and_i_characters
+
+
+Sec_search <- "2nd OSF search 
+(date: 2020-08-17)"
+
+box5 <-boxGrob(Sec_search,
+               y = 0.95,
+               x = 0.65,
+        txt_gp = TxtGp,
+        box_gp = gpar(fill = "#E6E8EF")) 
+
+Returned2 <- "Returned:
+N = 140"
+
+box6 <- boxGrob(Returned2,
+               y = 0.8,
+               x = 0.65,
+                txt_gp = TxtGp)
+
+
+Excluded2 <- "EXCLUDED (N = 124):
+-found in 1st 
+ search = 92
+-duplicate = 7
+-no hypothesis or a 
+ review = 25"
+
+box7 <- boxGrob(Excluded2,
+               y = 0.70,
+               x = 0.86,
+               just = "left",
+                txt_gp = TxtGp2,
+        box_gp = gpar(col = "grey"))
+
+
+Included2 <- "Included in
+study: N = 16"
+
+box8 <- boxGrob(Included2,
+               y = 0.6,
+               x = 0.65,
+                txt_gp = TxtGp)
+
+connectGrob(box5, box6, "vertical")
+connectGrob(box6, box8, "vertical")
+connectGrob(box6, box7, "-")
+
+box5
+box6
+box7
+box8
+
+third_search <- "3rd OSF search to reach desired 
+sample size (date: 2020-10-29):
+4 preregistrations meeting 
+criteria & registered after 2nd 
+search were randomly* selected
+from a sample of 6"
+
+box9 <-boxGrob(third_search,
+               y = 0.40,
+               x = 0.5,
+        txt_gp = TxtGp,
+        box_gp = gpar(fill = "#E6E8EF")) 
+box9
+
+
+final_sample <- "Final sample of preregistrations
+(N = 53) scored for level of
+specificity using RDoF scoring 
+protocol"
+
+box10 <-boxGrob(final_sample,
+               y = 0.225,
+               x = 0.5,
+        txt_gp = TxtGp,
+         box_gp = gpar(lwd = 2)) 
+
+adherence <- "Papers/preprints linked to 
+preregistrations identified 
+(N = 17) & authors' adherence 
+to preregistrations scored"
+
+box11 <-boxGrob(adherence,
+               y = 0.07,
+               x = 0.5,
+        txt_gp = TxtGp,
+         box_gp = gpar(lwd = 2)) 
+
+connectGrob(box9, box10, "vertical")
+connectGrob(box10, box11, "vertical")
+box10
+box11
+
+connectGrob(box8, box9, type = "vertical")
+connectGrob(box4, box9, type = "vertical")
+
+# The above plot might not print correctly here but it will do in the manuscript.
+# dev.off() # needed if saving via this code
+```
+
+# --------------------------------------------------------------------------------
+## Load & name datasets
+
+A note here: In our preregistration we called the previous, related study with which we are going to compare our findings "Veldkamp et al. (2018)" but this should have been "Bakker et al. (2018)" as Veldkamp is the second (not first) author.
+```{r results = FALSE, warning = FALSE}
+###### load and read the dataset from Bakker et al. (2018):
+# 1. Manually download the RData file from: 
+
+# https://osf.io/fgc9k/
+   
+# 2. Load the RData file into workspace
+load(file = "Data/Data from Bakker et al./Workspace_prereg_study_final_analyses_FINAL.RData") # LOAD ALL RESULTS/OUTCOMES FROM R ENVIRONMENT
+
+# 3. Select the relevant object and write into a readable csv file for easy future access:
+
+#  NON-IMPUTED data:
+write.table(data,
+            file = "Data/Data from Bakker et al./multidiscpinary_registrationsBakker.csv",
+            sep = ",",
+            row.names = TRUE)
+
+Bakker.data<- read.csv("Data/Data from Bakker et al./multidiscpinary_registrationsBakker.csv") # Read the dataset
+
+head(Bakker.data) # Check the data has loaded correctly
+# View(Bakker.data) # Check the data has loaded correctly
+names(Bakker.data) # Check the labels contained in the dataset
+
+#  IMPUTED data:
+write.table(group1,
+            file = "Data/Data from Bakker et al./multidiscpinary_registrations_imputed_Bakker.csv",
+            sep = ",",
+            row.names = TRUE)
+
+Bakkerdata.imputed<- read.csv("Data/Data from Bakker et al./multidiscpinary_registrations_imputed_Bakker.csv") # Read the dataset
+
+head(Bakkerdata.imputed) # Check the data has loaded correctly
+# View(Bakkerdata.imputed) # Check the data has loaded correctly
+names(Bakkerdata.imputed) # Check the labels contained in the dataset
+
+###### Load and read our master copy for the gambling preregistration scoring dataset:
+data<- read.csv("Data/Scoring_guides_final/Scoring_framework_RH_Master_copy.csv") 
+# View(data)
+head(data) # Check the data have loaded correctly
+```
+
+### Make our dataset usable
+To do this we need to:
+
+- Remove all rows containing notes on the coding process and the one study that was removed mid-coding
+- Remove the empty columns and rows
+- Make sure all of the columns are in the correct format/class required for analyses
+- Convert "99" scores to "NA" (we need to do this for restrictions scores firstly [Q1:Q22] as there are multiple missing rows within the adherence scoring columns because many preregistrations did not have an associated paper/preprint and “99” values help distinguish actual NA answers from missing values)
+
+```{r message=FALSE, warning=FALSE, results=FALSE}
+
+data_temp <- data[2:108,1:86] # There are numerous empty columns + rows after the data that require removing
+data_final<- data_temp %>%
+  filter(Preregistration_number != "Notes on pre-reg above" & 
+           Preregistration_number != "EXCLUDED MID-STUDY AS NO HYPOTHESES") %>% # Exclude columns with notes and irrelevant registration
+  mutate(across(c(Q1:Q22), na_if, 99)) # Convert 99 values to NAs where appropriate.
+
+# Find all of the specificity columns containing numeric data:
+data_final[,20:45]
+# Convert these from character class to numeric class:
+data_final[,20:45] <- lapply(data_final[,20:45], as.numeric) 
+
+names(data_final) # Check the labels contained in the dataset
+# View(data_final)
+```
+
+# --------------------------------------------------------------------------------
+
+# Preregistration specificity outcomes
+The following outcomes relate to the **specificity** of gambling researchers' preregistrations, or the extent to which they clearly specify all relevant aspects of the planned study according to our Researcher Degrees of Freedom (RDoF) scoring protocol (we use the term *specificity* scores here for clarity, but the original authors of this scoring protocol used the term *restriction* scores.)
+
+### Question-level descriptive scores
+Outcomes represent the scores given to each preregistration at the level of the questions (i.e., the exact score given for each question) and have not been coded in relation to the specific Researcher Degrees of Freedom (RDoF) items from Wicherts et al. (2016) as originally done by Bakker et al. (2018) who developed the scoring protocol we used. As stated in our transparent changes document (https://osf.io/6fk87/), we believe providing outcomes at this level provides more information than when the scores are converted to RDoF items due to the dependency involved in this method of scoring. 
+
+Let's start by computing some easily readable descriptive statistics for each *specificity* score for the *gambling* preregistrations.
+```{r message=FALSE, result = 'asis'}
+# Creates summary values for each specificity score:
+summary_figures <- data_final %>% summarise_at(vars(Q1:Q22), list(mean = mean,
+                                   sd = sd,
+                                   median = median,
+                                   min = min,
+                                   max= max), na.rm = TRUE) %>%
+  t() %>%
+  print()
+```
+<br>
+
+The above function spreads the values out in a way that is difficult to read. Let's isolate all of the values for each summary figure (mean, median etc.) and then join these together to create one readable table:
+```{r message=FALSE, warning=FALSE, results=FALSE}
+Mean <- summary_figures[1:23] %>%
+  print()
+SD <- summary_figures[24:46]  %>%
+  print()
+Median<- summary_figures[47:69] %>%
+  print()
+Min <- summary_figures[70:92] %>%
+  print()
+Max <- summary_figures[93:115] %>%
+  print()
+
+# Calculate the number of NA responses per question to also add to our table:
+NAcount <-sapply(data_final[20:42], function(y) sum(length(which(is.na(y))))) 
+
+# Create a character vector for the question numbers to add to the later data table:
+Specificity_item_nos <- as.factor(c("Q1", "Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10","Q11","Q12",
+                                "Q13","Q14","Q15","Q16","Q17","Q18","Q19","Q20","Q21a","Q21b","Q22"))
+
+#  Create a character vector that provides summary versions of the questions from the specificity scoring guide:
+Summarised_question <- as.factor(c("Is at least one hypothesis specified such that it is clear what are the independent and dependent variables?",
+                               "Is the direction of the hypothesis specified?",
+                               "Does the text explicitly exclude the possibility that at least one of the manipulated variables specified in the hypothesis will be omitted in the test of the hypothesis?",
+                               "Does the text specify exactly how the manipulated variable will be used in the analysis to test the hypothesis?",
+                               "Does the text explicitly exclude the possibility that at least one other variable (e.g. a covariate) is included in the analysis testing the hypothesis?",
+                               "Does the text specify exactly which measurement instrument will be used as the main outcome variable?",
+                               "Does the text explicitly specify that the confirmatory analysis section of the paper will not include another dependent variable than the ones specified in all hypotheses? ",
+                               "Does the pre-registration indicate inclusion and exclusion criteria in selecting data points used in the analysis?",
+                               "Is a power analysis reported?",
+                               "Is the sampling protocol outlined, including the exact number of participants, recruitment strategy, eligibility criteria, and stopping rules?",
+                               "Is it specified how randomization is implemented?",
+                               "Does the pre-registration describe procedures to blind participants to and/or experimenters to conditions?",
+                               "Does the pre-registration include protocols concerning coding of data, discarding of cases, or correction of scores during data collection?",
+                               "Does the pre-registration indicate how the study deals with incomplete or missing data?",
+                               "Does the pre-registration offer a protocol for pre-processing the data when required (e.g., smoothed, corrected for motion and other artifacts)?",
+                               "Does the pre-registration indicate how to test for violations of statistical assumptions and what to do with possible violations?",
+                               "Does the pre-registration indicate how to detect outliers and how they should be dealt with?",
+                               "Is the method used to measure the primary outcome variable(s) fully described?",
+                               "Are the methods used to measure non-manipulated independent variable(s) fully described?",
+                               
+                               "Does the pre-registration specify the statistical model(s) that will be used to test the hypothesis (e.g., MANOVA, logistic regression, SEM)?",
+                               "Does the pre-registration indicate details of the estimation technique used to estimate the statistical model and to compute standard errors?",
+                               "Does the pre-registration specify which statistical software package and version is used for running the analyses?",
+                               "Does the pre-registration indicate the inference criteria (e.g., Bayes factors, Alpha level, sidedness of the test, corrections for multiple testing)?"))
+```
+<br>
+
+Now join all these columns together and create a summary table:
+```{r message=FALSE, result = 'asis'}
+kable(Specificity_item_nos %>% bind_cols(Summarised_question, Mean, SD, Median, Min, Max, NAcount) %>%
+  as.data.frame() %>%
+   transmute("No." = ...1,
+             Question = ...2,
+             Mean = ...3,
+             SD = ...4,
+             Median = ...5,
+             Min = ...6,
+             Max = ...7,
+             "NA (n)" = ...8),
+   caption = '<b>Summary scores for each specificity question</b>', format = 'html', digits = 2) %>%
+   # col.names = c("Operator", "Group","n")) %>%
+   kable_classic(full_width = F, html_font = "Cambria") %>%
+  footnote(general = "Using the RDoF scoring protocol each preregistration is given a value between 0 and 3 for each question (although,some questions can only be scored 0, 1, or 3, and some can only be scored 0 or 3). A value of 0 indicates no specification at all, 1 indicates some specification but lacking detail, 2 indicates full specification of all relevant details, and a score of 3 requires full specification and an acknowledgement by the authors that they will not deviate from their preregisterd plan.",
+           footnote_as_chunk = T)
+```
+<br>
+
+Let's also compute some summary scores at the level of each preregistration: summarise the mean score for each registration.
+```{r}
+summary_scores_data<- data_final %>% select(Q1:Q22)
+
+summary_scores_data %>% 
+  dplyr::mutate(mean_score = rowMeans(summary_scores_data, na.rm = T)) %>%
+  dplyr::summarise(mean = mean(mean_score),
+                                   sd = sd(mean_score),
+                                   median = median(mean_score),
+                                   min = min(mean_score),
+                                   max= max(mean_score)
+            ) 
+
+```
+
+Calculate frequency of scores for each specificity question:
+```{r message=FALSE, warning=FALSE}
+sapply(X = data_final[20:45],
+       FUN = table)
+```
+
+Plot frequency of responses to each specificity question:
+```{r message=FALSE, warning=FALSE, fig.align = 'center', fig.height = 8, fig.width = 3}
+count_data <- data_final %>% select(Q1:Q22) %>%
+  pivot_longer(c("Q1", "Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10","Q11","Q12",
+                                "Q13","Q14","Q15","Q16","Q17","Q18","Q19","Q20","Q21a","Q21b","Q22"), 
+               names_to = "Question",
+               values_to = "Score") %>%
+  as.data.frame() %>% 
+  arrange(Question)
+
+count_data$Question <- as.factor(count_data$Question)
+
+count_data$Question<- factor(count_data$Question,
+                                c("Q1", "Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10","Q11","Q12",
+                                "Q13","Q14","Q15","Q16","Q17","Q18","Q19","Q20","Q21a","Q21b","Q22")) # Re-order factor levels
+
+count_data %>%
+  ggplot(aes(x=Score , y= reorder(Question, desc(Question)), fill = Question)) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient", calc_ecdf = TRUE,
+    # position = position_nudge(x = .6, y = -.17),
+    scale = 1.5
+  ) +
+  scale_x_continuous(name = "Specificty score", limits = c(-1, 4), breaks = c(0, 1, 2, 3)) +
+  scale_y_discrete(name = "Question") +
+  # scale_color_viridis_d()  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8.5, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.title.x = element_text(color="black", size=11, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=11, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond")) +
+  theme(legend.position = "none")
+```
+<br>
+
+### RDoF items descriptive scores
+Next we need to convert the raw scores to RDoF items scores for comparisons with the data collected by Velkdkamp et al.
+
+Some notes on this process: The following items do not have a specific question tied to them and therefore a score for them is provided by a question for another item (e.g., the score given to the question for item D3 also becomes the score given to the item A5):
+
+- C4: Determining the data collection stopping rule on the basis of desired results or intermediate significance testing (dependent on D7)
+- A5: Selecting the dependent variable at several alternative measures of the same construct (dependent on D3)
+- A7: Selecting another construct as the primary outcome (dependent on D4)
+- A8: Selecting independent variables out of the set of manipulated independent variables (dependent on D1)
+- A9: Operationalising manipulated independent variables in different ways (e.g., by discarding or combining levels of factors) (dependent on D1)
+- A10: Choosing to include different measured variables as covariates, independent variables, mediators, or moderators (dependent on D2)
+- A12: Using alternative inclusion and exclusion criteria for selecting participants in analyses (dependent on D5)
+
+Let's start by simply renaming the questions to the relevant RDoF items where no awkward dependencies are present, then add in the mutated dependency scores at the end of the function:
+
+```{r message=FALSE}
+data_rdof_format <-  data_final %>% transform(T1 = Q1,
+                         T2 = Q2,
+                         D2 = Q5,
+                         D3 = Q6,
+                         D5 = Q8,
+                         D6 = Q9,
+                         D7 = Q10,
+                         C1 = Q11,
+                         C2 = Q12,
+                         C3 = Q13,
+                         C4 = Q10,
+                         A1 = Q14,
+                         A2 = Q15,
+                         A3 = Q16,
+                         A4 = Q17,
+                         A5 = Q6,
+                         A6 = Q18,
+                         A8 = Q3,
+                         A9 = Q4,
+                         A10 = Q5,
+                         A11 = Q19,
+                         A12 = Q8,
+                         A13 = Q20,
+                         A15 = Q22
+                         ) %>%
+  mutate(D1 = case_when( # Add D1 score
+    Q3 == 3 ~ Q4,
+Q3 == 0 ~ 0
+  )) %>%
+  mutate(D4 = case_when( # Add D4 score
+    Q1 == 3 ~ Q7,
+    Q1 == 2 ~ 0
+  )) %>%
+  mutate(A7 = case_when(# Add A7 score
+    Q7 == 3 & Q1 == 3 ~ 3,
+    Q7 == 0 ~ 0
+  )) %>%
+  mutate(A14 = case_when(# Add A14 score
+    Q21a == 3 & Q21b == 3 ~ 3,
+    Q21a == 2 & Q21b == 2 ~ 2,
+    Q21a == 1 & Q21b == 1 ~ 1,
+    Q21a == 0 | Q21b == 0 ~ 0,
+    Q21b < Q21a ~ Q21a,
+    Q21a < Q21b ~ Q21a
+  )) %>%
+  mutate(R6 = case_when(# Add R6 score
+    Q7 == 3 & Q1 == 3 ~ 3,
+    Q7 == 0 ~ 0
+  ))
+
+# View(data_rdof_format)
+
+#  Isolate the RDoF item scores for future analyses:
+data_rdof_format_items <- data_rdof_format %>% select(T1,
+                         T2,D1,D2,D3,
+                         D4,D5,D6,D7,C1,
+                         C2, C3,C4,A1,A2,
+                         A3,A4,A5,A6,A7,A8,
+                         A9,A10, A11,A12,
+                         A13,A14, A15,
+                         R6) %>% 
+  as_tibble()
+```
+
+Now, as with the question scores, let's compute some easily readable descriptive statistics for each *RDoF Item* score for the *gambling* preregistrations.
+```{r message=FALSE, result = 'asis'}
+# Creates summary values for each specificity score:
+summary_figures_rdof_items <- data_rdof_format_items %>% 
+  summarise_at(vars(1:29), list(mean = mean,
+                                   sd = sd,
+                                   median = median,
+                                   min = min,
+                                   max= max), na.rm = TRUE) %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("key") %>%
+  print()
+```
+<br>
+
+Again, the above function spreads the values out in a way that is difficult to read. Let's isolate all of the values for each summary figure (mean, median etc.) and then join these together to create one readable table:
+```{r message=FALSE, warning=FALSE, results=FALSE}
+Mean2 <- summary_figures_rdof_items[1:29,] %>%
+    select(2) %>% 
+    print()
+SD2 <- summary_figures_rdof_items[30:58,]  %>%
+      select(2) %>% 
+      print()
+Median2<- summary_figures_rdof_items[59:87,] %>%
+      select(2) %>% 
+  print()
+Min2 <- summary_figures_rdof_items[88:116,] %>%
+      select(2) %>% 
+  print()
+Max2 <- summary_figures_rdof_items[117:145,] %>%
+      select(2) %>% 
+  print()
+
+# Calculate the number of NA responses per question to also add to our table:
+NAcount2 <-sapply(data_rdof_format_items[1:29], function(y) sum(length(which(is.na(y))))) 
+
+# Create a character vector for the question numbers to add to the later data table:
+rdof_items <- as.factor(c("T1","T2","D1",
+                          "D2","D3","D4","D5",
+                          "D6","D7","C1","C2", "C3",
+                          "C4","A1","A2","A3","A4","A5",
+                          "A6","A7","A8", "A9","A10", 
+                          "A11","A12","A13","A14",
+                          "A15","R6"))
+
+#  Create a character vector that provides summary versions of the RDoF from Witcherts et al. (2016):
+Summarised_rdof_item <- as.factor(c("Conducting exploratory research without any hypothesis",
+                                    "Studying a vague hypothesis that fails to specify the direction of the effect",
+                                    "Creating multiple manipulated independent variables and conditions",
+                                    "Measuring additional variables that can later be selected as covariates, independent variables, mediators, or moderators",
+                                    "Measuring the same dependent variable in several alternative ways",
+                                    "Measuring additional constructs that could potentially act as primary outcomes",
+                                    "Measuring additional variables that enable later exclusion of participants from the analysis (e.g., awareness or manipulation checks)",
+                                    "Failing to conduct a well-founded power analysis",
+                                    "Failing to specify the sampling plan and allowing for running (multiple) small studies",
+                                    "Failing to randomly assign participants to conditions",
+                                    "Insufficient blinding of the participants and/or experiments",
+                                    "Correcting, coding, or discarding data during data collection in non-blinded manner",
+                                    "Determining the data collection stopping rule on the basis of desired results or intermediate significance testing",
+                                    "Choosing between different options of dealing with incomplete or missing data on ad hoc grounds",
+                                    "Specifying pre-processing of data (e.g., cleaning, normalization, smoothing, and motion correction) in an ad hoc manner", 
+                                    
+                                    "Deciding how to deal with violations of statistical assumptions in an ad hoc manner",
+                                    "Deciding on how to deal with outliers in an ad hoc manner",
+                                    "Selecting the dependent variable at several alternative measures of the same construct",
+                                    "Trying out different ways to score the chosen primary dependent variable",
+                                    "Selecting another construct as the primary outcome",
+                                    "Selecting independent variables out of the set of manipulated independent variables",
+                                    "Operationalising manipulated independent variables in different ways (e.g., by discarding or combining levels of factors)",
+                                    "Choosing to include different measured variables as covariates, independent variables, mediators, or moderators",
+                                    "Operationalising nonmanipulated independent variables in different ways",
+                                    "Using alternative inclusion and exclusion criteria for selecting participants in analyses",
+                                    "Choosing between different statistical models",
+                                    "Choosing the estimation method, software package, and computation of SEs",
+                                    "Choosing inference criteria (e.g., Bayes factors, alpha level, sidedness of the test, corrections for multiple testing)",
+                                    "Presenting exploratory analyses as confirmatory (HARKing)"))
+```
+<br>
+
+Now join all these columns together and create a summary table for the RDoF item scores:
+```{r message=FALSE, result = 'asis'}
+kable(rdof_items %>% bind_cols(Summarised_rdof_item, Mean2, SD2, Median2, Min2, Max2, NAcount2) %>%
+  as.data.frame() %>%
+   transmute(Item = ...1,
+             Description = ...2,
+             Mean = V1...3,
+             SD = V1...4,
+             Median = V1...5,
+             Min = V1...6,
+             Max = V1...7,
+             "NA (N)" = ...8),
+   caption = '<b>Summary scores for each RDoF item</b>', 
+   format = 'html',
+   digits = 2) %>%
+   # col.names = c("Operator", "Group","n")) %>%
+   kable_classic(full_width = F, html_font = "Cambria") %>%
+  footnote(general = "Using the RDoF scoring protocol each preregistration is score a value between 0 and 3 for each question (although, question 1, 2, 6, and 15 can only be scored 0, 2, or 3; and questions 3, 5, and 7 can only be scored 0 or 3). A value of 0 indicates no specification at all, 1 indicates some specification but lacking detail, 2 indicates full specification of all relevant details, and a score of 3 requires full specification and an acknowledgement by the authors that they will not deviate from their preregisterd plan.",
+           footnote_as_chunk = T)
+```
+<br>
+
+Calculate frequency of scores for each item
+```{r message=FALSE, warning=FALSE, results=FALSE}
+sapply(X = data_rdof_format_items[1:29],
+       FUN = table)
+```
+
+Plot frequency of RDoF scores for each item for our scores and those from Bakker et al.:
+```{r message=FALSE, warning=FALSE, results = FALSE}
+data_rdof_format_items_graph <- data_rdof_format_items %>% 
+  pivot_longer(c(T1,T2,D1,D2,D3,
+                         D4,D5,D6,D7,C1,
+                         C2, C3,C4,A1,A2,
+                         A3,A4,A5,A6,A7,A8,
+                         A9,A10, A11,A12,
+                         A13,A14,A15,
+                         R6), 
+               names_to = "RDoF_Item",
+               values_to = "Score") %>%
+  as.data.frame() 
+
+data_rdof_format_items_graph$RDoF_Item <- as.factor(data_rdof_format_items_graph$RDoF_Item)
+
+data_rdof_format_items_graph$RDoF_Item<- factor(data_rdof_format_items_graph$RDoF_Item,
+                                c("T1", "T2",
+                         "D1","D2","D3", "D4",
+                         "D5","D6", "D7","C1",
+                         "C2","C3","C4", "A1","A2",
+                         "A3","A4","A5","A6","A7","A8",
+                         "A9","A10","A11","A12", "A13","A14",
+                         "A15","R6")) # Re-order factor levels
+
+p1 <- data_rdof_format_items_graph %>%
+  ggplot(aes(x=Score , y= reorder(RDoF_Item, desc(RDoF_Item)), fill = RDoF_Item)) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient", calc_ecdf = TRUE,
+    # position = position_nudge(x = .6, y = -.17),
+    scale = 1.5
+  ) +
+  scale_x_continuous(name = "Specificity score", limits = c(-1, 4), breaks = c(0, 1, 2, 3)) +
+  scale_y_discrete(name = "Researcher Degrees of Freedom code") +
+  scale_fill_viridis_d()  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8.5, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.title.x = element_text(color="black", size=10, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond")) +
+    theme(axis.text.y = element_text(vjust = -.6))+
+    ggtitle("Gambling 
+preregistrations")+
+  theme(plot.title = element_text(size = 10, hjust = 0.5,color="black", family = "Cormorant Garamond")) +
+  theme(legend.position = "none") +
+   annotate("text", x = 3.8, y = 29.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 28.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 24.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*")+
+   annotate("text", x = 3.8, y = 21.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 19.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 18.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 17.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 15.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 11.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 10.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 6.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*")  +
+   annotate("text", x = 3.8, y = 2.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*")  # We later decided to make the comparisons that were statistically significant and so these are based on the outcomes from our confirmatory tests below
+  #  theme(axis.line.x = element_line(arrow = arrow(type='closed', length = unit(10,'pt')))) +
+  # # annotate("segment", x = -0.9, xend = 4, y = 1, yend = 1, colour = "black", size=0.4, alpha=.8, arrow=arrow()) +
+  # annotate(
+  #   "text", x = 1.5, y = 0.7, family = "Cormorant Garamond", size = 2.5, color = "gray20",
+  #   label = "Increasing specificity")
+
+
+table(data_rdof_format_items_graph)
+
+# Now Bakker et al.: -------------
+Bakker.data_graph <- Bakker.data %>% 
+  filter(Preregistration_group == 1) %>%
+  select(T1:R6)  %>%
+pivot_longer(c(T1, T2,D1,D2,D3,
+                         D4,D5,D6,D7,C1,
+                         C2, C3,C4,A1,A2,
+                         A3,A4,A5,A6,A7,A8,
+                         A9,A10, A11,A12,
+                         A13, A14, A15,
+                         R6), 
+               names_to = "RDoF_Item",
+               values_to = "Score") %>%
+  as.data.frame() 
+
+Bakker.data_graph$RDoF_Item <- as.factor(Bakker.data_graph$RDoF_Item)
+
+Bakker.data_graph$RDoF_Item<- factor(Bakker.data_graph$RDoF_Item,
+                                c("T1", "T2",
+                         "D1","D2","D3", "D4",
+                         "D5","D6", "D7","C1",
+                         "C2","C3","C4", "A1","A2","A3","A4","A5","A6","A7","A8",
+                         "A9","A10","A11","A12", "A13","A14",
+                         "A15","R6")) # Re-order factor levels
+
+p2 <- Bakker.data_graph %>%
+  ggplot(aes(x=Score , y= reorder(RDoF_Item, desc(RDoF_Item)), fill = RDoF_Item)) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient", calc_ecdf = TRUE,
+    # position = position_nudge(x = .6, y = -.17),
+    scale = 1.5
+  ) +
+  scale_x_continuous(name = expression("Specificity score", symbol('\256')), limits = c(-1, 4), breaks = c(0, 1, 2, 3)) +
+  scale_y_discrete(name = "") +
+  scale_fill_viridis_d()  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text = element_text(color = "black", size = 9.5, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.title.x = element_text(color="black", size=10, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond")) +
+  theme(axis.text.y = element_text(vjust = -.6))+
+    ggtitle("Cross-discplinary 
+preregistrations 
+(Bakker et al., 2020)") +
+  theme(plot.title = element_text(size = 10, hjust = 0.5,color="black", family = "Cormorant Garamond")) +
+  theme(legend.position = "none")  +
+  # Add significance labels:
+   annotate("text", x = 3.8, y = 27.25, family = "mono", size = 1.5, color = "gray20",
+    label = "#")+
+
+   annotate("text", x = 3.8, y = 9.25, family = "mono", size = 1.5, color = "gray20",
+    label = "#") # We later decided to make the comparisons that were statistically significant and so these are based on the outcomes from our confirmatory tests below
+
+```
+
+Now join these plots together for easy comparisons between the samples:
+```{r message=FALSE, warning=FALSE, fig.align = 'center', fig.height = 8, fig.width = 6}
+
+# Create basic plot:
+Fig2 <-  p1 + p2 +
+  theme(plot.margin = unit(c(0,0,0.1,0), "cm"))
+
+# Draw on arrow:
+Fig2.1 <- ggdraw() +
+  draw_plot(Fig2) +
+  draw_image("arrow.png", scale = .4,
+             x = 0.039, y = -0.49) 
+# Add annotation:
+Fig2.1 + plot_annotation(
+  caption = 'Larger scores indicate greater specificity
+  
+  ') & 
+   theme(plot.caption = element_text(family = 'Cormorant Garamond', hjust = 0.57, vjust = 2, face = "italic", size = 10))
+
+# Save plot:
+ggsave("Figures/Fig2.pdf",
+       width = 4.7,
+       height = 7.5,
+       units = c("in"))
+       
+```
+<br>
+
+#### A note on these plots
+It's important to note that the RDoF item scores used in these plots are the **non**-imputed versions and thus there are very few values for some of the items due to the high number of "NA" scores given. I've included the frequency of NAs for each item below. As can be seen, items D1, C1, C2, A2, A8, and A9 have ≥29 NA values.
+
+```{r}
+print(NAcount2)
+```
+
+Bakker et al. used imputed scores for their confirmatory analyses and we will do the same later on to account for the missing (i.e., NA) values, as per our preregistered plan.
+
+#### Removal of our preregistrations from the sample
+Let's have a look at how the gambling preregistration to compare once we remove the ones authored by us. Given that we have paid considerable attention to preregistration practices, I would assume we scored higher than other gambling researchers in regards to the specificity of the registration.
+
+We have a dataset that contains a list of all the registrations we have authored. Let's load that and then use that to identify our registrations. We are still focusing RDoF item scores and not raw question scores.
+```{r message=FALSE, warning=FALSE}
+# Load and read dataset:
+list_of_authored_regs<- read.csv("Other_findings_records/list_of_present_author_preregs.csv") 
+
+# head(list_of_authored_regs) # Check the data have loaded correctly
+
+list_of_reg_nos <- list_of_authored_regs %>% 
+  select(Preregistration_number = Pre.reg..) %>% # Isolate the relevant registration nos. and make the label consistent with the main dataset
+  as_tibble() # Convert to so that we can see what class the column is
+
+data_rdof_format$Preregistration_number <- as.numeric(data_rdof_format$Preregistration_number)  # Make class consistent 
+
+data_rdof_format_items_excl_ours <- data_rdof_format %>% 
+  select(Preregistration_number,
+                         T1,
+                         T2,D1,D2,D3,
+                         D4,D5,D6,D7,C1,
+                         C2,C3,C4,A1,A2,
+                         A3,A4,A5,A6,A7,A8,
+                         A9,A10, A11,A12,
+                         A13,A14, A15,
+                         R6) %>% 
+  anti_join(list_of_reg_nos) %>%
+  as_tibble() %>%
+  print()
+```
+
+Removing our registrations leaves a sample of size of 36. Thus, at least one of our team was an author on 17 of the 53 registrations (32%). 
+
+Now, let's wrangle the dataset without our registrations and produce another plot for comparison.
+```{r message=FALSE, warning=FALSE, results = FALSE}
+data_rdof_format_items_excl_ours_graph <- data_rdof_format_items_excl_ours %>% 
+  pivot_longer(c(T1,T2,D1,D2,D3,
+                         D4,D5,D6,D7,C1,
+                         C2, C3,C4,A1,A2,
+                         A3,A4,A5,A6,A7,A8,
+                         A9,A10, A11,A12,
+                         A13,A14,A15,
+                         R6), 
+               names_to = "RDoF_Item",
+               values_to = "Score") %>%
+  as.data.frame() 
+
+data_rdof_format_items_excl_ours_graph$RDoF_Item <- as.factor(data_rdof_format_items_excl_ours_graph$RDoF_Item)
+
+data_rdof_format_items_excl_ours_graph$RDoF_Item<- factor(data_rdof_format_items_excl_ours_graph$RDoF_Item,
+                                c("T1", "T2",
+                         "D1","D2","D3", "D4",
+                         "D5","D6", "D7","C1",
+                         "C2","C3","C4", "A1","A2",
+                         "A3","A4","A5","A6","A7","A8",
+                         "A9","A10","A11","A12", "A13","A14",
+                         "A15","R6")) # Re-order factor levels
+
+p3 <- data_rdof_format_items_excl_ours_graph %>%
+  ggplot(aes(x=Score , y= reorder(RDoF_Item, desc(RDoF_Item)), fill = RDoF_Item)) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient", calc_ecdf = TRUE,
+    # position = position_nudge(x = .6, y = -.17),
+    scale = 1.5
+  ) +
+  scale_x_continuous(name = "Specificity score", limits = c(-1, 4), breaks = c(0, 1, 2, 3)) +
+  scale_y_discrete(name = "") +
+  scale_fill_viridis_d()  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8.5, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.title.x = element_text(color="black", size=10, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond")) +
+    ggtitle("Gambling registrations 
+excl. authors' own")+
+  theme(plot.title = element_text(size = 10, hjust = 0.5,color="black", family = "Cormorant Garamond")) +
+  theme(legend.position = "none")
+
+```
+
+Now join all 3 plots together for easy comparisons between them:
+```{r message=FALSE, warning=FALSE, fig.align = 'center', fig.height = 8, fig.width = 9}
+p3 + p1 + p2
+```
+<br>
+
+### Reporting of discolsures within preregistrations 
+
+Calculate frequency of scores for each question relating to disclosures that we added; which were:
+
+- Are funding sources for the work reported?
+- Are author conflicts of interest reported?
+- Are any restrictions (or lack thereof) on publishing the work reported?
+
+These questions were all scores as 0 (not reported) or 3 (reported):
+
+```{r message=FALSE, warning=FALSE}
+
+Dis1 <- table(data_final$Dis1..funding.) %>% 
+  as.data.frame() %>%
+  as_tibble() %>%
+  select("Reported" = Var1,
+         Frequency = Freq)
+
+Dis2 <- table(data_final$Dis2..COIs.) %>% 
+  as.data.frame() %>%
+  as_tibble() %>%
+  select("Reported" = Var1,
+         Frequency = Freq)
+
+Dis3 <- table(data_final$Dis3..Restriction.) %>% 
+  as.data.frame() %>%
+  as_tibble() %>%
+  select("Reported" = Var1,
+         Frequency = Freq)
+
+Row_names <- as.factor(c("Disclosure 1: Funding",
+                          "",
+                          "Disclosure 2: Conflicts of interest",
+                          "",
+                          "Disclosure 3: Restrictions on publishing",
+                          ""))
+
+disclosure.specificity.scores <- bind_rows(Dis1, Dis2, Dis3) %>%
+  bind_cols(Row_names) %>%
+  select(Question = ...3, 
+         everything()) %>%
+  mutate(Reported = recode_factor(Reported,
+    "0" = "No",
+    "3" = "Yes")) %>%
+      mutate(Percentage = Frequency/53*100)
+
+kable(disclosure.specificity.scores,
+    caption = '<b>Frequency of disclosure reporting among preregistrations</b>', format = 'html', digits = 2) %>%
+   # col.names = c("Operator", "Group","n")) %>%
+   kable_classic(full_width = F, html_font = "Cambria")
+
+```
+
+Now let's see how many reported disclosures that weren't authored by us:
+```{r message=FALSE}
+data_final_excl_ours <- data_final %>% 
+  mutate(Preregistration_number  = as.integer(Preregistration_number)) %>% 
+         anti_join(list_of_reg_nos) %>% 
+  as_tibble()
+                                                
+Dis1.2 <- 
+table(data_final_excl_ours$Dis1..funding.) %>% 
+  as.data.frame() %>%
+  as_tibble() %>%
+  select("Reported" = Var1,
+         Frequency = Freq)
+
+Dis2.2 <- table(data_final_excl_ours$Dis2..COIs.) %>% 
+  as.data.frame() %>%
+  as_tibble() %>%
+  select("Reported" = Var1,
+         Frequency = Freq)
+
+Dis3.2 <- table(data_final_excl_ours$Dis3..Restriction.) %>% 
+  as.data.frame() %>%
+  as_tibble() %>%
+  select("Reported" = Var1,
+         Frequency = Freq)
+
+Row_names <- as.factor(c("Disclosure 1: Funding",
+                          "",
+                          "Disclosure 2: Conflicts of interest",
+                          "Disclosure 3: Restrictions on publishing"))
+
+disclosure.specificity.scores.2 <- bind_rows(Dis1.2, Dis2.2, Dis3.2) %>%
+  bind_cols(Row_names) %>%
+  select(Question = ...3, 
+         everything()) %>%
+  mutate(Reported = recode_factor(Reported,
+    "0" = "No",
+    "3" = "Yes")) %>%
+      mutate(Percentage = Frequency/36*100)
+
+kable(disclosure.specificity.scores.2,
+    caption = '<b>Frequency of disclosure reporting among preregistrations excl. our registrations</b>', format = 'html', digits = 2) %>%
+   # col.names = c("Operator", "Group","n")) %>%
+   kable_classic(full_width = F, html_font = "Cambria")
+
+
+```
+<br>
+
+# Confirmatory analyses
+
+Pre-registered hypothesis:
+
+- "*we hypothesise that preregistrations of gambling studies will restrict RDoF to a lesser extent (i.e., have lower scores on the RDoF checklist items) than the multidisciplinary sample of preregistrations.*"
+
+Pre-registered confirmatory analysis plan:
+
+- "*We will use one-tailed non-parametric Wilcoxon-Mann-Whitney analyses to test the hypothesis that preregistrations of gambling studies will restrict RDoF to a lesser extent (i.e., have lower restriction scores) than the multidisciplinary sample of preregistrations. The Wilcoxon-Mann-Whitney tests will compare differences in restriction scores between gambling preregistrations and the random sample (n = 53) of multidisciplinary preregistrations selected by Bakker et al. (2018). For restriction scores scored as “N.A.”, Bakker et al. used a two-way imputation procedure based on corresponding row and column means before the restriction scores between the two groups of preregistrations were compared. Before conducting our confirmatory analyses, we will employ the same procedure for gambling preregistrations that are given N.A. scores and the resulting imputed data will be compared with the imputed data for Bakker and colleagues’ 53 multidiscipline preregistrations.*"
+
+### Imputation
+Start by imputing missing (i.e., NA) scores within the gambling dataset:
+
+```{r message=FALSE, warning=FALSE}
+
+data_rdof_format_items_mat<- as.matrix(data_rdof_format_items) #
+
+md.pattern(data_rdof_format_items_mat) #check how many missing values there are and where they are
+
+# Imputation of missing values for gambling preregistration specificity scores. Copied directly from preregistered analysis script:
+for(i in 1:nrow(data_rdof_format_items_mat))
+{
+  for(j in 1:ncol(data_rdof_format_items_mat))
+  {
+    if(is.na(data_rdof_format_items_mat[i,j])) #check if value is missing
+    {
+      data_rdof_format_items_mat[i,j] = mean(data_rdof_format_items_mat[i, ], na.rm=TRUE) + mean(data_rdof_format_items_mat[,j], na.rm=T) - mean(data_rdof_format_items_mat, na.rm=T)
+    }
+  }
+}
+
+data_rdof_format_items_imputed_df <- as.data.frame(data_rdof_format_items_mat)
+# data_rdof_format_items_imputed_df # View imputed dataset
+```
+
+### Combine the two datasets
+
+Now combine the gambling and cross-disciplinary registration datasets.
+```{r message=FALSE, warning=FALSE}
+# Check there are 52 registrations in the data:
+nrow(Bakkerdata.imputed)
+
+# Take a look at the names of all variables in both datasets:
+names(data_rdof_format)
+names(Bakkerdata.imputed)
+
+# Ah, it seems Bakker et al. didn't collect dates of registration for their sample so I'm going to manually find them on OSF and create a vector of these to add to the dataset:
+
+Bakkerdata.imputed$Link # Extract the links to follow to find dates
+
+# Well, after checking them it seems they were all registered during 2016. Let's create a vector for year then:
+Year<- rep(2016, times = 52) # Create character vector
+
+# We need to add a pre-registration "type/format" column to Bakker et al.'s data so we can summarise the characteristics of both samples later:
+data_rdof_format$Registration.type.format # Check what labels we used so we can make them consistent
+Registration.type.format <- rep("OSF Preregistration", times = 52) # Create character vector for Bakker et al.'s sample
+
+Bakkerdata.imputed.fomat <- Bakkerdata.imputed %>% # Add to existing dataset
+  bind_cols(Registration.type.format, Year) %>% 
+  select(1:35,
+         Registration.type.format = 36,
+         Year = 37)
+# Next, change the class of this variable to allow binding later:
+data_rdof_format$Preregistration_number <- as.numeric(data_rdof_format$Preregistration_number) #
+
+combineddata_temp<- data_rdof_format %>%
+  select(Preregistration_number,
+        Preregistration_group = Preregistration_group..gambling...2..multidiscplinary...1.,
+        Title = Study.protocol.Title,
+        Registration.type.format,
+        Year = Year.registered..registered..not.created.) %>%
+  bind_cols(data_rdof_format_items_imputed_df) %>% # Add imputed scores
+  bind_rows(Bakkerdata.imputed.fomat) %>% # Combine with Bakker et al.'s data
+  select(-Nr_hyp_coder_1,
+         -Nr_hyp_coder_2,
+         -Link) # Remove relevant columns from Bakker et al.'s data
+
+# Calculate the summed and mean specificity score for each pre-reg (then add new columns that contains these scores)
+dat <- combineddata_temp %>%  
+            select(6:34) # Isolate columns (doesn't seem to like including this and the below function together)
+
+row_summaries <- dat %>% 
+  mutate("Mean score" = rowMeans(dat, na.rm = T)) %>%
+  rowwise() %>% 
+  mutate(row_sum = sum(c_across(T1:R6))) %>%
+  select("Mean score",
+         row_sum) # Compute & select scores
+
+print(row_summaries, n = 10) # Check summaries seem accurate
+
+combineddata<- combineddata_temp %>%
+  bind_cols(row_summaries) # Add to main dataset
+
+# Check new dataset appears correct (including registration format/type column):
+tail(combineddata)
+nrow(combineddata)
+```
+
+### Wilcoxon signed rank tests
+Now we have our imputed and combined dataset ready to go, let's run our confirmatory comparisons between the gambling sample and the sample of cross-disciplinary registrations from Bakker et al. (2018).
+
+```{r message=FALSE, warning=FALSE}
+
+combineddata$Preregistration_group # Check vector for group designation for any errors/missing designations
+
+test_results <- t(sapply(combineddata[,6:35], function(x) unlist(wilcox.test(x ~ combineddata$Preregistration_group,
+                                                paired = FALSE,
+                                                alternative = "greater",
+                                                correct = TRUE,
+                                                conf.int = TRUE, 
+                                                conf.level = 0.95)[c("statistic",
+                                                               "parameter",
+                                                               "estimate",
+                                                               "conf.int",
+                                                               "p.value")]))) %>%
+  as.data.frame() %>%
+  rownames_to_column("RDoF") %>%
+  select(1:2,
+         est.diff.in.loc = "estimate.difference in location",
+         4:6) %>%
+  print()
+```
+
+The above analysis involves one tailed Wilcox tests but contrary to our hypothesis, it seems gambling study preregistrations score much higher than the cross-disciplinary preregistrations. So, let's perform two-tailed tests instead:
+```{r message=FALSE, warning=FALSE}
+test_results <- t(sapply(combineddata[,6:35], function(x) unlist(wilcox.test(x ~ combineddata$Preregistration_group,
+                                                paired = FALSE,
+                                                alternative = "two.sided",
+                                                correct = TRUE,
+                                                conf.int = TRUE, 
+                                                conf.level = 0.95)[c("statistic",
+                                                               "parameter",
+                                                               "estimate",
+                                                               "conf.int",
+                                                               "p.value")]))) %>%
+  as.data.frame() %>%
+  rownames_to_column("RDoF") %>%
+  select(1:2,
+         est.diff.in.loc = "estimate.difference in location",
+         4:6) %>%
+  print()
+
+
+# Check accuracy of output against random items:
+wilcox.test(D1 ~Preregistration_group, combineddata,
+                                                paired = FALSE,
+                                                alternative = "two.sided",
+                                                correct = TRUE,
+                                                conf.int = TRUE, 
+                                                conf.level = 0.95)
+
+```
+
+Now let's calculate Cliff’s Delta effect sizes:
+```{r}
+effect_sizes<- t(sapply(combineddata[,6:35], function(x) unlist(cliff.delta(x ~ combineddata$Preregistration_group,
+                                                combineddata,conf.level=.95,
+                                                use.unbiased=TRUE, 
+                                                use.normal=FALSE,
+                                                return.dm=TRUE)[c("estimate",
+                                                               "conf.int")]))) %>%
+  as.data.frame() %>%
+  rownames_to_column("RDoF") %>%
+  select(2:4)
+
+effect_sizes
+```
+
+# --------------------------------------------------------------------------------
+
+# Exploratory analyses relating to preregistration specificity
+
+Let's see how specificity scores are affected by factors like author groups, the year of the registration and the type of template used.
+
+Let's add a grouping variable to the data set to compare registrations authored by at least one of our team vs. those remaining and calculate some summary stats:
+
+```{r message=FALSE, warning=FALSE, results = FALSE}
+
+author_group <- rep("ours", times = 17) # create label for our registrations
+
+author_grouped_data_temp<- list_of_reg_nos %>% 
+  bind_cols(author_group) %>% # add label
+  dplyr::rename(author_group = ...2) %>%
+  full_join(combineddata) %>% # merge with main dataset 
+  filter(Preregistration_group != "1") # isolate our sample
+
+author_grouped_data_temp$author_group[is.na(author_grouped_data_temp$author_group)] <- "not ours" # Replace missing values in our new column with a label to note that these registrations were not authored by one of us. 
+
+author_group_summary_scores<- author_grouped_data_temp %>% 
+  dplyr::rename(mean_score = "Mean score") %>%
+  group_by(author_group) %>%
+  summarise(
+    group_mean = mean(mean_score),
+    sd = sd(mean_score),
+    median = median(mean_score)
+  ) %>% 
+  print()
+```
+
+Now simply calculate some brief summary values for our other comparisons:
+```{r}
+# Year:
+year.summary.values <-combineddata %>% as_tibble() %>% 
+  filter(Preregistration_group == "2") %>%
+  select(Year, mean_score = "Mean score") %>%
+  mutate(Year = as.factor(Year)) %>%
+  group_by(Year) %>%
+  dplyr::summarize(
+    median = median(mean_score),
+    mean = mean(mean_score)
+    ) %>%
+  print()
+
+# Template:
+template.summary.values <- combineddata %>% as_tibble() %>% 
+     mutate(Template  = fct_recode(Registration.type.format,
+                                              "OSF Preregistration" = "Prereg Challenge")) %>% 
+  filter(Preregistration_group == "2") %>%
+  select(Template, mean_score = "Mean score") %>%
+  mutate(Template = as.factor(Template)) %>%
+  group_by(Template) %>%
+  dplyr::summarize(
+    median = median(mean_score),
+    mean = mean(mean_score)
+    ) %>%
+  print()
+```
+
+### Plot these data
+
+Before developing raincloud plots we have to run the following code taken from the below sources:
+
+- https://wellcomeopenresearch.org/articles/4-63
+- https://github.com/RainCloudPlots/RainCloudPlots/blob/master/tutorial_R/R_rainclouds.R
+- Note: the below code modifies the existing github page by removing a parenthesis in line 50
+
+```{r warnings = FALSE, message = FALSE}
+# Defining the geom_flat_violin function:
+"%||%" <- function(a, b) {
+  if (!is.null(a)) a else b
+}
+
+geom_flat_violin <- function(mapping = NULL, data = NULL, stat = "ydensity",
+                             position = "dodge", trim = TRUE, scale = "area",
+                             show.legend = NA, inherit.aes = TRUE, ...) {
+  layer(
+    data = data,
+    mapping = mapping,
+    stat = stat,
+    geom = GeomFlatViolin,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      trim = trim,
+      scale = scale,
+      ...
+    )
+  )
+}
+
+#' @rdname ggplot2-ggproto
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomFlatViolin <-
+  ggproto("GeomFlatViolin", Geom,
+          setup_data = function(data, params) {
+            data$width <- data$width %||%
+              params$width %||% (resolution(data$x, FALSE) * 0.9)
+            
+            # ymin, ymax, xmin, and xmax define the bounding rectangle for each group
+            data %>%
+              group_by(group) %>%
+              mutate(
+                ymin = min(y),
+                ymax = max(y),
+                xmin = x,
+                xmax = x + width / 2
+              )
+          },
+          
+          draw_group = function(data, panel_scales, coord) {
+            # Find the points for the line to go all the way around
+            data <- transform(data,
+                              xminv = x,
+                              xmaxv = x + violinwidth * (xmax - x)
+            )
+            
+            # Make sure it's sorted properly to draw the outline
+            newdata <- rbind(
+              plyr::arrange(transform(data, x = xminv), y),
+              plyr::arrange(transform(data, x = xmaxv), -y)
+            )
+            
+            # Close the polygon: set first and last point the same
+            # Needed for coord_polar and such
+            newdata <- rbind(newdata, newdata[1, ])
+            
+            ggplot2:::ggname("geom_flat_violin", GeomPolygon$draw_panel(newdata, panel_scales, coord))
+          },
+          
+          draw_key = draw_key_polygon,
+          
+          default_aes = aes(
+            weight = 1, colour = "grey20", fill = "white", size = 0.5,
+            alpha = NA, linetype = "solid"
+          ),
+          
+          required_aes = c("x", "y")
+  )
+```
+
+Now create summary plots:
+```{r fig.align='center', fig.height=3.5, fig.width=8, message=TRUE, warning=FALSE}
+
+fig3.1 <- combineddata %>%
+  select(1:34,
+         mean_score = "Mean score",
+         36) %>%
+    filter(Preregistration_group == "2") %>% # focus on gambling registrations
+  mutate(Year = as.factor(Year)) %>%
+  as_tibble() %>% 
+ggplot(mapping =  aes(x = Year, y = mean_score), fill = Year) +
+  geom_flat_violin(aes(fill = Year),
+                   position = position_nudge(x = 0.27, y = 0), adjust = .9, trim = FALSE, alpha = .75, colour = "black")+
+  geom_point(aes(x = Year, y = mean_score, fill = Year),
+             position = position_jitter(width = .1), size = .5) +
+  # scale_fill_manual(values=c("#E69F00", "#56B4E9")) +
+  geom_boxplot(aes(x = Year, y = mean_score, fill = Year),
+               position = position_nudge(x = 0.18, y = 0), outlier.shape = NA, alpha = .5, width = .08) +
+    scale_fill_viridis_d() +
+  scale_y_continuous(name = "Mean specificty score", breaks = c(0, 0.5, 1, 1.5, 2, 2.5, 3)) +
+  scale_x_discrete(name = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text = element_text(color = "black", size = 10, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.text.y = element_text(color = "black", size = 10, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.title.x = element_text(color="black", size=10, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=11, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond")) +
+    # ggtitle("")+
+  theme(plot.title = element_text(size = 10.5, hjust = 0.5,color="black", family = "Cormorant Garamond")) +
+  theme(legend.position = "none")
+
+
+combineddata$Registration.type.format<- factor(combineddata$Registration.type.format,
+                                c("Open-Ended Registration",
+                                  "Prereg Challenge", 
+                                  "OSF Preregistration",
+                                  "Preregistration Template from AsPredicted.org",
+                                  "OSF-Standard Pre-Data Collection Registration"
+                                  )) # Re-order factor levels
+
+
+fig3.2 <- combineddata %>%
+  select(1:3,
+        Template = Registration.type.format, 5:34,
+         mean_score = "Mean score",
+         36
+         ) %>% 
+   mutate(Template  = fct_recode(Template,
+                                              "OSF Preregistration" = "Prereg Challenge",
+                                 "AsPredicted.org Template" = "Preregistration Template from AsPredicted.org",
+                                 "OSF-Standard Pre-Data Collection" = "OSF-Standard Pre-Data Collection Registration")) %>% 
+    filter(Preregistration_group == "2") %>% # focus on gambling registrations
+  # mutate(Preregistration_group = as.factor()) %>%
+  as_tibble() %>% 
+ggplot(mapping =  aes(x = Template, y = mean_score), fill = Template) +
+  geom_flat_violin(aes(fill = Template),
+                   position = position_nudge(x = 0.27, y = 0), adjust = .9, trim = FALSE, alpha = .75, colour = "black")+
+  geom_point(aes(x = Template, y = mean_score, fill = Template),
+             position = position_jitter(width = .1), size = .5) +
+  # scale_fill_manual(values=c("#E69F00", "#56B4E9")) +
+  geom_boxplot(aes(x = Template, y = mean_score, fill = Template),
+               position = position_nudge(x = 0.18, y = 0), outlier.shape = NA, alpha = .5, width = .08) +
+    scale_fill_viridis_d() +
+  scale_y_continuous(name = "Mean specificty score", 
+                     # limits = c(0, 2),
+                     breaks = c(0, 0.5, 1, 1.5, 2, 2.5, 3)) +
+  scale_x_discrete(name = "", labels = c("Open-ended
+Registration",
+"OSF 
+preregistration",
+"Preregistration 
+template from
+AsPredicted.org",
+"OSF standard 
+pre-data 
+collection"
+)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text.y = element_text(color = "black", size = 9.5, face = "plain", family = "Cormorant Garamond"))+
+   theme(axis.text.x = element_text(color = "black", size = 9, face = "plain", family = "Cormorant Garamond", angle = 45, vjust = 0.6))+
+  # theme(axis.text.x = element_blank()) +
+  theme(axis.title.x = element_text(color="black", size=11, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=11, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond")) +
+    # ggtitle("")+
+    # theme(
+    #   legend.position = c(0.8, 0.8),
+    #     legend.text = element_text(color="black", size=8, face="plain", family = "Cormorant Garamond"),
+    #     legend.title=element_text(size=10, family = "Cormorant Garamond", hjust = 0.5)) +
+  theme(legend.position = "none") +
+  theme(plot.title = element_text(size = 11, hjust = 0.3,color="black", family = "Cormorant Garamond"))
+
+
+fig3.1 + fig3.2 + 
+   plot_annotation(tag_levels = 'A') & 
+  theme(plot.tag = element_text(size = 11, family = "Cormorant Garamond", face = "bold")) + 
+  theme(plot.margin = unit(c(0.1,.2,-0.5,.1), "cm"))
+  # plot_layout(widths = c(1, 1.)) 
+
+
+ggsave("Figures/Fig3.pdf",
+       width = 180,
+       height = 110,
+       units = c("mm"))
+```
+
+## Year of registration for Bakker et al. sample
+When were the preregistrations in Bakker et al.'s sample registered? We got an intern to add all the dates to a dataset so let's load that in and provide some summary stats.
+
+```{r}
+Bakker_data_w_dates<- read.csv("Data/Data from Bakker et al./Bakker_data_with_dates_of_registration.csv") # LOAD dataset
+
+head(Bakker_data_w_dates)
+
+Bakker_data_w_dates_final<- Bakker_data_w_dates %>% select(Date.Registered,
+                               Preregistration_number = Title) %>% # For some reason this has swapped here so it needs relabelling
+  separate(Date.Registered, into = c("day_month", "year"), sep =",", fill = "warn") %>% # Make a usable date column for start
+full_join(Bakker.data) %>% 
+filter(Preregistration_group == 1) %>%
+  as_tibble()
+
+table(Bakker_data_w_dates_final$year)
+
+# Our outcome says 51 were registered in 2016, but there are 52 in the sample.
+
+# Let's take a look a the year which doesn't have a date and check the link
+Bakker_data_w_dates_final %>% select(year, Preregistration_number, Link)
+
+# The link for no. 57 leads to a page that states: "The googledrive add-on containing Preregistration%20Outline_Social%20Message%20Framing.gdoc is no longer authorized."
+
+# So, I'm sure we can safely assume all were registered in 2016
+```
+
+## No. hypotheses
+
+Let's also compute some summary figures for the number of hypotheses. There was some confusion here as to how many hypotheses researchers were stating and so we've given minimum and maximum values for the total number of hypotheses within each preregistration.
+
+```{r}
+
+
+summary.of.hyp.confusions<- data_final %>% 
+  mutate(max_hyp = as.numeric(max_hyp)) %>% # For some reason, it treats this column as a character variable and therefore won't calculate the mean correctly if not converted
+  summarise(
+  mean_min_hyp = mean(min_hyp),
+  mean_max_hyp = mean(max_hyp),
+  SD_min_hyp = sd(min_hyp),
+  SD_max_hyp = sd(max_hyp),
+  median_min_hyp = median(min_hyp),
+  median_max_hyp = median(max_hyp),
+  min_min_hyp = min(min_hyp),
+  min_max_hyp = min(max_hyp),
+  max_min_hyp = max(min_hyp),
+  max_max_hyp = max(max_hyp)
+) %>% 
+  print()
+
+# Let's take a detailed look at the discrepancies:
+data_final %>% mutate(confusion = case_when(max_hyp > min_hyp ~ TRUE)) %>% 
+  select(min_hyp,
+         max_hyp,
+         confusion)
+
+# How many registrations had a confusing number of hypotheses?
+no.hyp.confusions<- data_final %>% mutate(confusion = case_when(max_hyp > min_hyp ~ TRUE)) %>% 
+  select(min_hyp,
+         max_hyp,
+         confusion) %>%  
+  summarise(
+    n = count(confusion)
+  ) %>% 
+  as.matrix() %>%
+  print()
+```
+
+## Structure used in open ended registrations 
+Researchers using open ended templates to structure their registrations appear to have high specificity scores, but we remember from scoring that many of these may have used a standard template that was simply inserted into a word document. Let’s find all of those using an open-ended template and manually review them to see what type of structure they used.
+
+```{r}
+table(data_final$Registration.type.format)
+
+data_final %>%  
+  filter(Registration.type.format == "Open-Ended Registration") %>% 
+  select(Preregistration_number,
+        Study.protocol.Title,
+        Registration.type.format,
+        Protocol.URL)
+```
+
+- https://osf.io/q37bw/ = uses OSF template 
+- https://osf.io/3dmb6 = uses open structure 
+- https://osf.io/5u497/ = uses OSF template 
+- https://osf.io/k8gst = uses OSF template 
+- https://osf.io/hej3y = uses OSF template 
+- https://osf.io/47vqh/ = uses OSF template 
+- https://osf.io/abrgq/ = uses OSF template 
+- https://osf.io/qs8mt/ = uses OSF template 
+- https://osf.io/2jnru/ = uses OSF template 
+- https://osf.io/et2sg/ = uses OSF template 
+- https://osf.io/srd6m = uses OSF template 
+
+
+So, all but one (91%) used the OSF template in a word/pdf doc.
+
+## Do specifcity scores correlate?
+
+Note: We're using imputed data for these correlations.
+```{r fig.align='center', fig.height=4, fig.width=4, message=TRUE, warning=FALSE}
+
+# First provide summary scores for each area of specificity:
+data_rdof_format_imputed_summary_categories<-  data_rdof_format_items_imputed_df %>%
+  as_tibble() %>%
+    rowwise() %>% 
+  mutate(Hypotheses =  sum(c_across(T1:T2))) %>%
+  mutate(Design = sum(c_across(D1:D7))) %>%
+  mutate(Collection = sum(c_across(C1:C4))) %>%
+  mutate(Analyses = sum(c_across(A1:A15))) %>% 
+  select(Hypotheses:Analyses) %>% 
+  remove_rownames() %>%
+  print()
+
+# Compute a correlation matrix
+Correlation <- round(cor(data_rdof_format_imputed_summary_categories, method = "spearman"), 2)
+
+# Visualize
+ggcorrplot(Correlation, 
+           # p.mat = cor_pmat(data_rdof_format_imputed_summary_categories2),
+           hc.order = TRUE, 
+           type = "lower",
+           color = c("#FDE725FF",
+             # "#B8DE29FF",
+             "white", "#35B779FF",
+             number.cex=0.9),
+           outline.col = "white", lab = TRUE,
+           lab_size = 2.5) +
+  theme(axis.text.y = element_text(color = "black", size = 9, face = "plain", family = "Cormorant Garamond")) + 
+    theme(axis.text.x = element_text(color = "black", size = 9, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 9, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+   theme(legend.text=element_text(color = "black", size = 9.5, face = "plain", family = "Cormorant Garamond")) +
+ guides(scale=guide_legend(title="Correlation
+coefficient")) +
+    theme(plot.margin = unit(c(2,.2,0.,.2), "cm"))+
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+ggsave("Figures/Fig4.pdf",
+       width = 90,
+       height = 90,
+       units = c("mm"))
+# Make a second plot of the same info but with a different colour scheme to join to the below scatter plots (new colour scheme avoids confusing the two scales with different meanings)
+
+pCor<- ggcorrplot(Correlation, 
+           # p.mat = cor_pmat(data_rdof_format_imputed_summary_categories2),
+           hc.order = TRUE, 
+           type = "lower",
+           color = c(
+             "#39568CFF",
+             "white", 
+             "#440154FF"),
+           outline.col = "white", lab = TRUE,
+           lab_size = 2,
+           lab_col = "white") +
+  theme(axis.text = element_text(color = "black", size = 8, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 10, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+ guides(scale=guide_legend(title="Correlation
+coefficient")) +
+    theme(plot.margin = unit(c(2,.2,0,.2), "cm"))+
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+```
+
+Let's create some scatterplots to see how these relationships actually look:
+```{r fig.align='center', fig.height=7, fig.width=9, message=TRUE, warning=FALSE}
+
+design_analysis <- ggplot(data_rdof_format_imputed_summary_categories, aes(x = Analyses, y = Design)) + 
+  geom_point(aes(color = Analyses), size = 1.5) +
+scale_color_gradientn(colours = c("#33638DFF", "#35B779FF", "#FDE725FF"))+
+  # scale_fill_viridis_d(begin = 0.4, end = 0.8) +
+  theme(legend.position = "right")+
+  theme(axis.text = element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 12, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+  theme(axis.title.x = element_text(color="black", 
+                                    size=10, 
+                                    face="plain",
+                                    # vjust=1,
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond"))+
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(legend.position = "none")
+
+
+hypotheses_design <- ggplot(data_rdof_format_imputed_summary_categories, aes(x = Hypotheses, y = Design)) + 
+  geom_point(aes(color = Design), size = 1.5) +
+scale_color_gradientn(colours = c("#33638DFF", "#35B779FF", "#FDE725FF"))+
+  # scale_fill_viridis_d(begin = 0.4, end = 0.8) +
+  theme(legend.position = "right")+
+  theme(axis.text = element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 12, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+  theme(axis.title.x = element_text(color="black", 
+                                    size=10, 
+                                    face="plain",
+                                    # vjust=1,
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond"))+
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(legend.position = "none")
+
+
+hypotheses_analyses <- ggplot(data_rdof_format_imputed_summary_categories, aes(x = Hypotheses, y = Analyses)) + 
+  geom_point(aes(color = Hypotheses), size = 1.5) +
+scale_color_gradientn(colours = c("#33638DFF", "#35B779FF", "#FDE725FF"))+
+  # scale_fill_viridis_d(begin = 0.4, end = 0.8) +
+  theme(legend.position = "right")+
+  theme(axis.text = element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 12, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+  theme(axis.title.x = element_text(color="black", 
+                                    size=10, 
+                                    face="plain",
+                                    # vjust=1,
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond"))+
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(legend.position = "none")
+
+
+datacollection_hypotheses <- ggplot(data_rdof_format_imputed_summary_categories, aes(x = Hypotheses, y = Collection)) + 
+  geom_point(aes(color = Hypotheses), size = 1.5) +
+scale_color_gradientn(colours = c("#33638DFF", "#35B779FF", "#FDE725FF"))+
+  # scale_fill_viridis_d(begin = 0.4, end = 0.8) +
+  theme(legend.position = "right")+
+  theme(axis.text = element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 12, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+  theme(axis.title.x = element_text(color="black", 
+                                    size=10, 
+                                    face="plain",
+                                    # vjust=1,
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond"))+
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(legend.position = "none")
+
+
+datacollection_design <- ggplot(data_rdof_format_imputed_summary_categories, aes(x = Collection, y = Design)) + 
+  geom_point(aes(color = Design), size = 1.5) +
+scale_color_gradientn(colours = c("#33638DFF", "#35B779FF", "#FDE725FF"))+
+  # scale_fill_viridis_d(begin = 0.4, end = 0.8) +
+  theme(legend.position = "right")+
+  theme(axis.text = element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 12, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+  theme(axis.title.x = element_text(color="black", 
+                                    size=10, 
+                                    face="plain",
+                                    # vjust=1,
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond"))+
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(legend.position = "none")
+
+
+datacollection_analyses <- ggplot(data_rdof_format_imputed_summary_categories, aes(x = Collection, y = Analyses)) + 
+  geom_point(aes(color = Analyses), size = 1.5) +
+scale_color_gradientn(colours = c("#33638DFF", "#35B779FF", "#FDE725FF"))+
+  # scale_fill_viridis_d(begin = 0.4, end = 0.8) +
+  theme(legend.position = "right")+
+  theme(axis.text = element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 12, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+  theme(axis.title.x = element_text(color="black", 
+                                    size=10, 
+                                    face="plain",
+                                    # vjust=1,
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond"))+
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(legend.position = "none")
+
+
+pScat<- (design_analysis|hypotheses_design)/
+(hypotheses_analyses|datacollection_hypotheses)/
+(datacollection_design|datacollection_analyses)
+
+Pcor2<- plot_spacer()/ pCor/ plot_spacer()
+
+(Pcor2| pScat) + 
+  plot_layout(widths = c(1, 3.5)) +
+   plot_annotation(tag_levels = 'A') & 
+  theme(plot.tag = element_text(size = 10, family = "Cormorant Garamond", face = "bold"))
+
+ggsave("Figures/Fig4_extended.pdf",
+       width = 180,
+       height = 120,
+       units = c("mm"))
+
+```
+Some of the correlations appear to be influenced by an outlier, which is one of our preregistrations.
+
+#### Correlations sans outlier
+Let's remove this pre-reg (no. 33) and remake the correlation plot.
+
+Remember: We're using imputed data for these correlations.
+```{r fig.align='center', fig.height=4, fig.width=7, message=TRUE, warning=FALSE}
+
+# First provide summary scores for each area of specificity (this time without the outlier):
+
+data_rdof_format_items_imputed_df_sans33 <- data_rdof_format_items_imputed_df[-33,] # Outlier removal
+
+data_rdof_format_imputed_summary_categories_sans33<-  data_rdof_format_items_imputed_df_sans33 %>%
+  as_tibble() %>% 
+    rowwise() %>% 
+  mutate(Hypotheses =  sum(c_across(T1:T2))) %>%
+  mutate(Design = sum(c_across(D1:D7))) %>%
+  mutate(Collection = sum(c_across(C1:C4))) %>%
+  mutate(Analyses = sum(c_across(A1:A15))) %>% 
+  select(Hypotheses:Analyses) %>% 
+  remove_rownames() %>%
+  print()
+
+# Compute a correlation matrix (this time without the outlier):
+Correlation2 <- round(cor(data_rdof_format_imputed_summary_categories_sans33, method = "spearman"), 2)
+
+# Let's check we have the correct prereg (i.e., the outlier), by plotting one of the scatter graphs from earlier:
+design_analysis_sans33 <-  ggplot(data_rdof_format_imputed_summary_categories_sans33, aes(x = Analyses, y = Design)) + 
+  geom_point(aes(color = Analyses), size = 1.5) +
+scale_color_gradientn(colours = c("#33638DFF", "#35B779FF", "#FDE725FF"))+
+  # scale_fill_viridis_d(begin = 0.4, end = 0.8) +
+  theme(legend.position = "right")+
+  theme(axis.text = element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 12, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+  theme(axis.title.x = element_text(color="black", 
+                                    size=10, 
+                                    face="plain",
+                                    # vjust=1,
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond"))+
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(legend.position = "none")
+
+# Now compare scatter graphs:
+design_analysis + design_analysis_sans33
+
+# Yes, it looks like we have removed the correct preregistration.
+
+# Now re-visualize all correlation coefficients sans the outlier:
+pCor_sans33<- ggcorrplot(Correlation2, 
+           # p.mat = cor_pmat(data_rdof_format_imputed_summary_categories2),
+           hc.order = TRUE, 
+           type = "lower",
+           color = c(
+             "#39568CFF",
+             "white", 
+             "#440154FF"),
+           outline.col = "white", lab = TRUE,
+           lab_size = 2,
+           lab_col = "white") +
+  theme(axis.text = element_text(color = "black", size = 8, face = "plain", family = "Cormorant Garamond")) + 
+  theme(legend.title=element_text(color = "black", size = 10, face = "plain", family = "Cormorant Garamond")) +
+  theme(legend.title.align = .5) +
+   theme(legend.text=element_text(color = "black", size = 10.5, face = "plain", family = "Cormorant Garamond")) +
+ guides(scale=guide_legend(title="Correlation
+coefficient")) +
+    theme(plot.margin = unit(c(2,.2,0,.2), "cm"))+
+   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+# Now let's join this new plot and our original plot side by side to see how the coefficients are affected by the removal of the outlier:
+pCor + pCor_sans33 +
+  plot_annotation(tag_levels = 'A', 
+                  title = 'Correlations between specificity scores with (A) and without (B) a substantial outlier',
+                  theme = theme(plot.title = element_text(size = 18))) & 
+  theme(plot.tag = element_text(size = 12, family = "Cormorant Garamond", face = "bold")) + 
+  theme(text = element_text("Cormorant Garamond"))
+```
+Well, looking at the above it doesn't seem like the outlier had much of an effect on the correlation coefficients and so we will keep it in the figures presented in the manuscript.
+
+<br><br>
+
+# --------------------------------------------------------------------------------
+
+# Preregistration adherence outcomes
+
+The following outcomes are all computed in an exploratory in nature and relate to gambling researchers' **adherence** to their preregistration.
+
+First, let's make a usable dataset for this data. To do this we need to:
+
+- Isolate all the pre-regs with associated pre-prints/papers
+- Convert 99 scores to "NA" values.
+- Remove scores for the questions that are simply repeated so we provide only one response to each question.
+
+```{r message=FALSE, warning=FALSE}
+
+ # data_final[!(is.na(data_final$T1_dev_score)), ]
+ 
+data_adherence_and_reporting<- data_final %>%
+  filter(T1_dev_score!="") %>%
+  mutate(across(c(T1_dev_score:R6), na_if, 99)) # Convert 99 values to NAs where appropriate.
+
+nrow(data_adherence_and_reporting)
+```
+
+Let's count the frequencies of adherence scores given across the entire sample:
+```{r}
+dev_score_counts<- data_adherence_and_reporting %>%
+    select(-C4_dev_score, # Remove repeated questions
+         -A5_dev_score,
+         -D6_dev_score,
+          -A9_dev_score,
+           -A10_dev_score,
+           -A12_dev_score) %>%
+    gather("key", "value", T1_dev_score:Dis3__dev_score) %>% 
+    group_by(value) %>%
+    summarise(n=n()) %>%
+   mutate(Percentage = (n/sum(n))*100) %>% 
+    dplyr::rename(Summation = n)
+
+
+kable(dev_score_counts,
+    caption = '<b>Summary of adherence scores</b>', align = "c", format = 'html',
+    digits = 2,
+   col.names = c("Score","Frequency", "Percentage")) %>%
+   kable_classic(full_width = F, html_font = "Cambria")
+```
+
+Now let's count the frequencies of adherence scores for each question:
+```{r}
+dev_score_counts_byitem<- data_adherence_and_reporting %>%
+    gather("key", "value", T1_dev_score:Dis3__dev_score) %>% 
+    group_by(value) %>%
+  select(key, value) %>%
+    group_by(key) %>%
+    count(value) %>%
+  pivot_wider(names_from = value, values_from = n)%>%
+   select(key, "0", "1", "2", "3", "U(P)", "U(A)", "U(B)", "NA")
+  
+dev_score_counts_byitem[is.na(dev_score_counts_byitem)] <- 0 # Replace missing values with 0 so it's clear that this score wasn't present for the relevant questions
+
+dev_score_counts_byitem$key <- factor(dev_score_counts_byitem$key, levels =
+                                c("T1_dev_score",
+                 "T2_dev_score",
+  "D1_dev_score",
+  "D2_dev_score",
+  "D3_dev_score",
+  "D4_dev_score",
+  "D5_dev_score",
+  "D6_dev_score",
+  "D7_dev_score",
+    "C1_dev_score",
+    "C2_dev_score",
+    "C3_dev_score",
+    "C4_dev_score",
+  "A1_dev_score",
+  "A2_dev_score",
+  "A3_dev_score",
+  "A4_dev_score",
+  "A5_dev_score",
+  "A6_dev_score",
+  "A7_dev_score",
+  "A8_dev_score",
+  "A9_dev_score",
+  "A10_dev_score",
+  "A11_dev_score",
+  "A12_dev_score",
+  "A13_dev_score",
+  "A14.1_dev_score",
+  "A14.2_dev_score",
+  "A15_dev_score",
+      "Dis1_dev_score",
+      "Dis2__dev_score",
+      "Dis3__dev_score")) # Re-order factor levels for presentation later
+
+dev_score_counts_byitem<- dev_score_counts_byitem[order(dev_score_counts_byitem$key),]
+
+
+dev_score_counts_byitem <- dev_score_counts_byitem %>%
+  filter(key != "C4_dev_score"& # Remove repeated questions
+         key != "A5_dev_score" &
+          key != "D6_dev_score" &
+           key != "A9_dev_score" &
+           key != "A10_dev_score" &
+           key != "A12_dev_score") %>%
+  mutate(key  = fct_recode(key,
+                "Are the hypotheses reported the same as in the preregistration?" = "T1_dev_score", 
+                "Is the direction of each hypothesis the same?" = "T2_dev_score",
+   "Are the manipulated independent variables operationalised in the same way stated in the protocol?" = "D1_dev_score",
+   "Are all variables included in analyses testing hypotheses consistent with the preregistered analysis plan?" = "D2_dev_score",
+   "Are dependent variables measured in the same way as stated in the preregistration?" = "D3_dev_score",
+   "Are all dependent variables included in analyses reported in the preregistration?" = "D4_dev_score",
+   "Are the criteria for including datapoints in analyses consistent?" = "D5_dev_score",
+   "Is the sample size involved in  analyses consistent with the outcomes of the power analysis reported in the preregistration?" = "D7_dev_score",
+     "Is the sampling protocol stated in the preregistration followed?" = "D7_dev_score",
+     "Is the randomisation procedure used consistent with that reported in the preregistration?" = "C1_dev_score",
+     "Is the blinding procedure used consistent with that reported in the preregistration?" = "C2_dev_score",
+     "Are the procedures used to code and manage data during the data collection process?" = "C3_dev_score",
+   "Are the procedures used to deal with missing data consistent with those reported in the preregistration?" = "A1_dev_score",
+   "Are the procedures used to pre-process data consistent?" = "A2_dev_score",
+   "Are the procedures used to test for statistical assumptions consistent?" = "A3_dev_score",
+   "Are the procedures used to identify and deal with outliers consistent?" = "A4_dev_score",
+   "Are the dependent variables scored in a way that is consistent?" = "A6_dev_score",
+   "Are the dependent variables used in primary analyses all the same as reported in the preregistration?" = "A7_dev_score",
+   "Are the independent variables used in primary analyses all the same?" = "A8_dev_score",
+   "Are non-manipulated IVs operationalised in a way consistent with the preregistration?" = "A11_dev_score",
+   "Are the statistical tests used to test hypotheses consistent?" = "A13_dev_score",
+   " Are the estimation techniques used to estimate the statistical model(s) consistent?" = "A14.1_dev_score",
+   "Was the statistical software used to conduct analyses consistent with the preregistered plan?" = "A14.2_dev_score",
+   "Are the inference criteria used consistent?" = "A15_dev_score",
+       "Are the funding sources reported the same as stated in the preregistration?" = "Dis1_dev_score",
+       "Are the competing interests reported the same?" = "Dis2__dev_score",
+       "Are the constraints on publishing reported the same?" = "Dis3__dev_score"))
+
+dev_score_counts_byitem_htmltable <- dev_score_counts_byitem %>% dplyr::rename("zero" = "0",
+                                                              "one" = "1",
+                                                              "two" = "2",
+                                                              "three" = "3",
+                                                              "UP" = "U(P)",
+                                                              "UA" = "U(A)",
+                                                              "UB" = "U(B)",
+                                                              "NAT" = "NA")
+
+# dev_score_counts_byitem_htmltable$zero <- cell_spec(dev_score_counts_byitem_htmltable$zero, align = "center")
+# dev_score_counts_byitem_htmltable$one <- cell_spec(dev_score_counts_byitem_htmltable$one, align = "center")
+# dev_score_counts_byitem_htmltable$two <- cell_spec(dev_score_counts_byitem_htmltable$two, align = "center")
+# dev_score_counts_byitem_htmltable$three <- cell_spec(dev_score_counts_byitem_htmltable$three, align = "center")
+# dev_score_counts_byitem_htmltable$UP <- cell_spec(dev_score_counts_byitem_htmltable$UP, align = "center")
+# dev_score_counts_byitem_htmltable$UA <- cell_spec(dev_score_counts_byitem_htmltable$UA, align = "center")
+# dev_score_counts_byitem_htmltable$UB <- cell_spec(dev_score_counts_byitem_htmltable$UB, align = "center")
+# dev_score_counts_byitem_htmltable$NAT <- cell_spec(dev_score_counts_byitem_htmltable$NAT, align = "center")
+
+dev_score_counts_byitem_htmltable$zero <- ifelse(
+  dev_score_counts_byitem_htmltable$zero > 0,
+  cell_spec(dev_score_counts_byitem_htmltable$zero, color = "green", bold = T),
+  cell_spec(dev_score_counts_byitem_htmltable$zero, color = "black"))
+
+dev_score_counts_byitem_htmltable$one <- ifelse(
+  dev_score_counts_byitem_htmltable$one > 0,
+  cell_spec(dev_score_counts_byitem_htmltable$one, color = "blue", bold = T),
+  cell_spec(dev_score_counts_byitem_htmltable$one, color = "black"))
+
+dev_score_counts_byitem_htmltable$two <- ifelse(
+  dev_score_counts_byitem_htmltable$two > 0,
+  cell_spec(dev_score_counts_byitem_htmltable$two, color = "red", bold = T),
+  cell_spec(dev_score_counts_byitem_htmltable$two, color = "black"))
+  
+dev_score_counts_byitem_htmltable$three <- ifelse(
+  dev_score_counts_byitem_htmltable$three > 0,
+  cell_spec(dev_score_counts_byitem_htmltable$three, color = "red", bold = T),
+  cell_spec(dev_score_counts_byitem_htmltable$three, color = "black"))
+  
+
+kbl(dev_score_counts_byitem_htmltable, escape = F,
+    caption = '<b>Summary of preregistration adherence scores</b>',
+    align=c('l','c','c','c','c','c','c','c'),
+    format = 'html',
+   col.names = c("Abbreviated question", "0", "1", "2", "3", "U$^P$", "U$^A$", "U$^B$", "NA"))  %>%
+   kable_classic(full_width = F, 
+                 "striped",
+                 html_font = "Cambria") %>%
+  add_header_above(c(" ", "Score$^1$" = 8)) %>%
+    footnote(general = "We answered all questions in relation to the confirmatory, hypothesis tests.",
+             number = "Scoring system: 0 = Yes, consistent with preregistration—no deviation; 1 = No, deviation from preregistration made & declared by the authors & a justification for change is provided; 2 = No, deviation from preregistration made & declared, but no justification for deviation is provided; 3 = No, deviation made & not declared or justified by the authors; U = unable to determine due to lack of detail reported in preregistration [scored as U$^P$] (e.g., randomisation procedure not reported in preregistration but used in study) the article [U$^A$] (e.g., randomisation procedure described in preregistration not reported in the article) or both [U$^B$] (e.g., randomisation procedure not specified in either the pre-registration or article).",
+           footnote_as_chunk = T)
+
+```
+<br>
+
+Next, let's have a look at how many preregistrations made deviations and provide some study-level summary figures:
+```{r message=FALSE, warning=FALSE}
+# How many studies made any form of deviation from their registration (including clearly reported and explained/justified deviations)?
+  
+total_deviations<- data_adherence_and_reporting %>%
+  as_tibble() %>%
+  mutate_at(vars(T1_dev_score:Dis3__dev_score), as.double) %>%
+  as.data.frame() %>%
+filter_at(vars(T1_dev_score:Dis3__dev_score), any_vars(.>=1)) %>%
+  select(T1_dev_score:Dis3__dev_score) %>% 
+  nrow() %>% 
+  print()
+
+# How many studies made a deviation from their registration that wasn't reported and explained/justified? We only need to select scores of "3" here as no studies were given a score of 2 (i.e., reported but not justified deviation):
+
+total_undeclared_deviations<- data_adherence_and_reporting %>%
+  as_tibble() %>%
+  mutate_at(vars(T1_dev_score:Dis3__dev_score), as.double) %>%
+  as.data.frame() %>%
+  filter_at(vars(T1_dev_score:Dis3__dev_score), any_vars(.==3)) %>%
+  select(T1_dev_score:Dis3__dev_score) %>% 
+  nrow() %>% 
+  print()
+
+# How many studies made a deviation from their registration that WAS reported AND explained/justified?
+total_declared_deviations<- data_adherence_and_reporting %>%
+  as_tibble() %>%
+  mutate_at(vars(T1_dev_score:Dis3__dev_score), as.double) %>%
+  as.data.frame() %>%
+  filter_at(vars(T1_dev_score:Dis3__dev_score), any_vars(.==1)) %>%
+  select(T1_dev_score:Dis3__dev_score) %>% 
+  nrow() %>% 
+  print()
+
+# Wrangle the data into a format that will make computation of study level summary figures possible:
+data_adherence_scores_pivoted <- data_adherence_and_reporting %>%
+  select(Preregistration_number, Year.registered..registered..not.created.,T1_dev_score:Dis3__dev_score) %>% 
+  pivot_longer(c("T1_dev_score",
+                 "T2_dev_score",
+  "D1_dev_score",
+  "D2_dev_score",
+  "D3_dev_score",
+  "D4_dev_score",
+  "D5_dev_score",
+  "D6_dev_score",
+  "D7_dev_score",
+    "C1_dev_score",
+    "C2_dev_score",
+    "C3_dev_score",
+    "C4_dev_score",
+  "A1_dev_score",
+  "A2_dev_score",
+  "A3_dev_score",
+  "A4_dev_score",
+  "A5_dev_score",
+  "A6_dev_score",
+  "A7_dev_score",
+  "A8_dev_score",
+  "A9_dev_score",
+  "A10_dev_score",
+  "A11_dev_score",
+  "A12_dev_score",
+  "A13_dev_score",
+  "A14.1_dev_score",
+  "A14.2_dev_score",
+  "A15_dev_score",
+      "Dis1_dev_score",
+      "Dis2__dev_score",
+      "Dis3__dev_score"),
+               names_to = "Question",
+               values_to = "Score") %>%
+  dplyr::rename(year = Year.registered..registered..not.created.)
+
+# Calculate summary figures for score the of 3:
+summary_undeclared_deviations<- data_adherence_scores_pivoted %>%
+  group_by(Preregistration_number) %>% 
+  filter(Score == 3|Score == 0 | Score == 1) %>% # need to include all studies but remove character values (all studies definitely had at least one of these)
+  summarise(sum(Score == "3")) %>% 
+  print(n=50) %>%
+  dplyr::rename(no3scores = `sum(Score == "3")`) %>%
+  summarise(mean = mean(no3scores),
+            sd = sd(no3scores),
+            min = min(no3scores),
+            max = max(no3scores)) %>%
+  print()
+
+# Did the number of 3 scores change over time:
+undeclared_deviations_over_time<- data_adherence_scores_pivoted %>%
+  group_by(year) %>% 
+  filter(Score == 3|Score == 0 | Score == 1) %>% # need to include all studies but remove character values (all studies definitely had at least one of these)
+  summarise(n = sum(Score == "3")) 
+
+# What about the percentage of studies making at least one undeclared deviation over time?
+
+# Start by calculating the number of preregistered studies that made at least one undeclared deviation by year:
+no._undeclared_deviations_number_studies_over_time<- data_adherence_and_reporting %>%
+  as_tibble() %>%
+  mutate_at(vars(T1_dev_score:Dis3__dev_score), as.double) %>%
+  as.data.frame() %>%
+  filter_at(vars(T1_dev_score:Dis3__dev_score), any_vars(.==3)) %>%
+  select(Year.registered..registered..not.created., T1_dev_score:Dis3__dev_score)  %>%
+  dplyr::rename(Year = Year.registered..registered..not.created.) %>% 
+  group_by(Year) %>% 
+ summarise(
+   n = n()
+           ) %>% 
+  print()
+
+# Now calculate the total number of preregistrations a year in the sample, join this dataset with the last one created, and calculate percentage figures:
+undeclared_deviations_over_time_summary<- data_adherence_and_reporting %>%
+  dplyr::rename(Year = Year.registered..registered..not.created.) %>% 
+  group_by(Year) %>% 
+ summarise(
+   n = n()
+           ) %>% 
+ bind_cols(no._undeclared_deviations_number_studies_over_time) %>% 
+  select(Year = Year...1,
+         No.deviating.studies = n...4,
+         Total.no.studies = n...2) %>% 
+  mutate(Percentage = No.deviating.studies/Total.no.studies*100) %>% 
+  print()
+
+# Calculate summary figures for score the of 1:
+summary_declared_deviations<- data_adherence_scores_pivoted %>%
+  group_by(Preregistration_number) %>% 
+  filter(Score == 3| Score == 0 | Score == 1) %>% # need to include all studies but remove character values (all studies definitely had at least one of these)
+  summarise(sum(Score == "1")) %>% 
+  dplyr::rename(no3scores = `sum(Score == "1")`) %>%
+  summarise(mean = mean(no3scores),
+            sd = sd(no3scores),
+            min = min(no3scores),
+            max = max(no3scores)) %>%
+  print()
+            
+```
+
+# --------------------------------------------------------------------------------
+
+# Study reporting quality
+
+Finally, let's summarise the outcomes relating to study reporting quality which we assessed using RDoF items R1 to R6 from Witcherts et al.'s 2016 RDoF checklist.
+
+```{r message=FALSE, warning=FALSE}
+study_reporting_quality <- data_adherence_and_reporting %>%
+    gather("Question", "value", R1.1:R6) %>% 
+    group_by(value) %>%
+  select(Question, value) %>%
+    group_by(Question) %>%
+    count(value) %>%
+  pivot_wider(names_from = value, values_from = n) %>%
+  dplyr::rename("Yes" = '1',
+         "No" = '2') %>%
+  mutate(Question  = fct_recode(Question,
+                                "Are data shared and accessible to all?" = "R1.1",
+                               "Are the data analysis scripts shared and accessible?" = "R1.2",
+                               "Are the methods reported sufficiently to allow replication? Including all study materials used?" = "R2",
+                               "Is the preregistration clearly mentioned and linked/signposted in the article and easily accessible?" = "R3",
+                                "Are any experiments that were preregistered not reported?" = "R4",
+                                "Does running the paper through statcheck highlight any potential statistical errors?"= "R5", 
+                                "Are any hypotheses reported that weren't stated in the preregistration?"= "R6"))
+                                
+
+study_reporting_quality[is.na(study_reporting_quality)] <- 0 # Replace missing values with 0 so it's clear that this score wasn't present for the relevant questions
+
+kable(study_reporting_quality,
+    caption = '<b>Summary of study reporting quality</b>', align = c("l","c","c","c"), format = 'html') %>%
+   kable_classic(full_width = F, html_font = "Cambria")
+```
+<br>
+
+We saved all .csv files from the statcheck tool checks so lets load these and analyse the data from them. A note: prior to analysis, we manually changed the "source" columns for all datasets so that the source was listed as the pre-reg number and not the name of the file uploaded to statcheck. 
+```{r message=FALSE, warning=FALSE}
+
+Prereg_3and5 <- read.csv("Data/Statcheck outcomes/Prereg_3and5.csv") %>% 
+  mutate(Source = as.character(Source)) # needed in order to bind all datasets below (this and the third in this list have characters in this column).
+Prereg_6 <- read.csv("Data/Statcheck outcomes/Prereg_6.csv") %>% 
+  mutate(Source = as.character(Source))
+Prereg_10_11_12 <- read.csv("Data/Statcheck outcomes/Prereg_10,11,12.csv") %>% 
+  mutate(Source = as.character(Source))
+Prereg_23 <- read.csv("Data/Statcheck outcomes/Prereg_23.csv") %>% 
+  mutate(Source = as.character(Source))
+Prereg_34 <- read.csv("Data/Statcheck outcomes/Prereg_34.csv")  %>%
+  mutate(Source = as.character(Source))
+Prereg_50 <- read.csv("Data/Statcheck outcomes/Prereg_50.csv")  %>%
+  mutate(Source = as.character(Source))
+Prereg_51 <- read.csv("Data/Statcheck outcomes/Prereg_51.csv")  %>% 
+  mutate(Source = as.character(Source))
+
+statcheck_outcomes <- bind_rows(Prereg_3and5,
+          Prereg_6,
+          Prereg_10_11_12,
+          Prereg_23,
+          Prereg_34,
+          Prereg_50,
+          Prereg_51)
+
+Normal_errors_statcheck <- table(statcheck_outcomes$Error) %>% 
+  print()
+
+Decision_errors_statcheck <-table(statcheck_outcomes$DecisionError) %>% 
+  print()
+```
+
+Let's manually check these errors to see if statcheck has accurately detected the test statistic, df, and p values:
+
+- No errors in #3and5.
+- Decision error in #10-12: Checked and does NOT appear to be an error. Statcheck mistake in identifying the p-value correctly. 
+- Two errors in #10-12: Checked and ONE DOES and ONE DOES NOT appear to be an error. Statcheck mistake in identifying the p-value correctly on the latter.
+- Three errors in #23: Checked and DO appear to be errors.
+- No errors in #34.
+- No errors in #50.
+- No errors in #51.
+
+# --------------------------------------------------------------------------------
+
+#### Save final workspace environment for use in manuscript:
+```{r warnings = FALSE, message = FALSE}
+save.image(file='Outcomes.RData')
+
+# Signal end of script:
+beep(4)
+```
+END
