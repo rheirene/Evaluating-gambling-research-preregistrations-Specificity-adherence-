@@ -1,0 +1,524 @@
+---
+title: "Outcome summary without scores of 3"
+author: "Rob Heirene"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+## Introduction
+This html document outline supplemental analysis code and outcomes for the below study:
+
+<br>
+<center>
+ **"Evaluating preregistration practices in the open science era: A case study of preregistered gambling studies**
+</center>
+<br>
+
+We note in the limitations section manuscript that our preregistration scoring political may have some issues. Specifically, we write: "*Sixth, there might also be limitations to the specificity scoring protocol we used to evaluate preregistrations. To achieve a maximum score of 3 on most RDoF items requires preregistration authors to explicitly state that they will not deviate from their pre-specified method by, for example, using additional eligibility criteria or reasons for excluding data points. Although such statements may add value in restricting RDoF, this approach is unconventional in scientific research and therefore scores of 2 and 3 could be viewed as equivalent until the value of making explicit promises not to deviate from preregistrations has been empirically evaluated.*"
+
+To address this issue, here we present some of the key results from our study after changing all values of "3" to "2".
+
+## Load packages & fonts
+Create function to check to see if packages are installed and install them if they are not, and then load them into the R session. From:
+
+- https://gist.github.com/stevenworthington/3178163#file-ipak-r-L1
+
+```{r message=FALSE, results = FALSE}
+# Create function:
+ipak <- function(pkg){
+    new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+    if (length(new.pkg)) 
+        install.packages(new.pkg, dependencies = TRUE)
+    sapply(pkg, require, character.only = TRUE)
+}
+
+# Name relevant packages:
+packages <- c("MOTE",
+              "plyr",
+              "dplyr",
+              "knitr",
+              "Rmisc", 
+              "beepr",
+              "extrafont",
+              "extrafontdb",
+              "ggplot2",
+              "ggcorrplot",
+              "Gmisc",
+              "glue",
+              "htmlTable",
+              "grid",
+              "magrittr",
+              "forcats",
+              "sjmisc",
+              "data.table",
+              "tidyr",
+              "tibble",
+              "effsize",
+              # "lubridate",
+              "cowplot",
+              "readr",
+              "car",
+              "fmsb",
+              "purrr",
+              "scales",
+              "patchwork",
+              # "multicon",
+              "ggridges",
+              "broom",
+              # "broom.mixed",
+              "ggstatsplot",
+              "ggsci",
+              "showtext",
+              "aod",
+              "ggpubr",
+              "rstatix",
+              "WRS2",
+              "lsr",
+              "BayesFactor",
+              "epitools",
+              "DescTools",
+              "mosaic",
+              "kableExtra",
+              "table1",
+              "mice",
+              "english",
+              "apa",
+              "gtable",
+              "osfr",
+              "readxl")
+
+# Load packages:
+ipak(packages)
+
+# Load fonts:
+font_add_google("Cormorant Garamond")
+showtext_auto()
+```
+
+Remove all objects from work space before starting:
+```{r}
+rm(list = ls())
+```
+
+
+Load R.DATA file containing all analysis objects from the main analysis script:
+
+```{r Data-import, echo = FALSE, results = FALSE, warnings = FALSE, message = FALSE}
+load(file = "Outcomes.RData") # LOAD ALL RESULTS/OUTCOMES FROM MAIN ANALYSIS SCRIPT
+```
+
+
+let's start by recoding the RDoF scores so that all scores of "3" given to cross disciplinary and gambling preregistrations become scores of" 2":
+```{r}
+# Gambling sample:
+
+# RECODE ALL SCORES OF 3 TO 2:
+data_rdof_format_items_recoded = data_rdof_format_items %>%
+  dplyr::mutate_at(vars(T1:R6), funs(dplyr::recode(., '3' = 2, 
+                                                   '2' = 2,
+                                                   '1' = 1,
+                                                   '0' = 0,  .default = NaN))) %>%
+as_tibble() %>%
+  print()
+
+# Check new scores against the old ones to ensure it's recoded correctly:
+as_tibble(data_rdof_format_items)
+
+
+
+# Bakker et al.:
+Bakker.data # Check dataset
+ncol(Bakker.data) # How many columns are there? (useful for subsetting below)
+names(Bakker.data)
+
+
+# RECODE ALL SCORES OF 3 TO 2:
+Bakker_data_recoded = Bakker.data %>%
+  dplyr::mutate_at(vars(T1:R6), funs(dplyr::recode(., '3' = 2, 
+                                                   '2' = 2,
+                                                   '1' = 1,
+                                                   '0' = 0,  .default = NaN))) %>%
+as_tibble() %>%
+  print()
+
+# Check new scores against the old ones to ensure it's recoded correctly:
+as_tibble(Bakker.data)
+
+```
+
+## Summary scores table
+Let's now recreate table 3 from the manuscript with our recoded scores:
+```{r message=FALSE, warning=FALSE, results = FALSE, echo = FALSE}
+# Develop a table that presents the summary scores above our sample and Bakker et al.'s preregistrations. NON IMPUTED DATA USED.
+
+
+# Gambling sample:
+
+  # Creates summary values for each specificity score:
+summary_figures_rdof_items_recoded <- data_rdof_format_items_recoded %>% 
+  summarise_at(vars(1:29), list(mean = mean,
+                                   sd = sd,
+                                   median = median,
+                                   min = min,
+                                   max= max), na.rm = TRUE) %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("key") %>%
+  print()
+
+
+# The above function spreads the values out in a way that is difficult to read. Let's isolate all of the values for each summary figure (mean, median etc.) and then join these together to create one readable table:
+
+Mean2 <- summary_figures_rdof_items_recoded[1:29,] %>%
+    select(2) %>% 
+    print()
+SD2 <- summary_figures_rdof_items_recoded[30:58,]  %>%
+      select(2) %>% 
+      print()
+Median2<- summary_figures_rdof_items_recoded[59:87,] %>%
+      select(2) %>% 
+  print()
+Min2 <- summary_figures_rdof_items_recoded[88:116,] %>%
+      select(2) %>% 
+  print()
+Max2 <- summary_figures_rdof_items_recoded[117:145,] %>%
+      select(2) %>% 
+  print()
+
+
+
+       
+# Bakker et al.:     
+
+# Creates summary values for each specificity score:
+summary_figures_Bakker.data <- Bakker_data_recoded %>%
+  filter(Preregistration_group == 1) %>% # Select the Target group
+  summarise_at(vars(7:35), list(mean = mean,
+                                   sd = sd,
+                                   median = median), na.rm = TRUE) %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("key")
+
+# The above function spreads the values out in a way that is difficult to read and table. Let's isolate all of the values for each summary figure (mean, median etc.) and then join these together to create one readable table:
+
+Mean3 <- summary_figures_Bakker.data[1:29,] %>%
+  select(2)
+SD3 <- summary_figures_Bakker.data[30:58,]  %>%
+    select(2)
+Median3<- summary_figures_Bakker.data[59:87,] %>%
+    select(2)
+
+# Create a summary label column for our table:
+RDoF_labels <- c("Hypothesis", 
+                 "Direction of hypothesis",
+                 "Multiple manipulated IVs",
+                 "Additional IVs",
+                 "Multiple DV measures", 
+                 "Additional constructs",
+                 "Additional exclusion variables", 
+                 "Power analysis",
+                 "Sampling plan",
+                 "Random assignment",
+                 "Blinding", 
+                 "Data handling/collection",
+                 "Stopping rule",
+                 "Missing data", 
+                 "Data pre-processing",
+                 "Statistical assumptions",
+                 "Outliers", 
+                 "Selected DV measured",
+                 "DV scoring", 
+                 "Primary outcome selection",
+                 "IV selection",
+                 "Operationalising manipulated IVs",
+                 "Inclusion of additonal IVs", 
+                 "Operationalising non-manipulated IVs", 
+                 "Eligbility criteria", 
+                 "Statisical model selection", 
+                 "Method and package", 
+                 "Inference criteria", 
+                 "HARKing") # Don't include "&"s as this won't work in Latex
+
+RDoF_labels_summary <- c(" T1: Hypothesis", 
+                 " T2: Direction of hypothesis",
+                 " D1: Multiple manipulated IVs",
+                 " D2: Additional IVs",
+                 " D3: Multiple DV measures", 
+                 " D4: Additional constructs",
+                 " D5: Adding exclusion variables", 
+                 " D6: Power analysis",
+                 " D7: Sampling plan",
+                 " C1: Random assignment",
+                 " C2: Blinding", 
+                 " C3: Data handling/collection",
+                 " C4: Stopping rule",
+                 " A1: Missing data", 
+                 " A2: Data pre-processing",
+                 " A3: Statistical assumptions",
+                 " A4: Outliers", 
+                 " A5: DV measure selection",
+                 " A6: DV scoring", 
+                 " A7: Primary outcome selection",
+                 " A8: IV selection",
+                 " A9: Defining manipulated IVs",
+                 "A10: Adding additional IVs", 
+                 "A11: Defining non-manipulated IVs", 
+                 "A12: Eligbility criteria", 
+                 "A13: Statisical model selection", 
+                 "A14: Method and package", 
+                 "A15: Inference criteria", 
+                 "R6: HARKing") # Don't include "&"s as this won't work in Latex
+
+# Calculate the number of NA responses per question to also add to our table:
+Bakker.data.group1only<- Bakker_data_recoded %>%
+  filter(Preregistration_group == 1)
+
+NAcount3 <-sapply(Bakker.data.group1only[7:35], function(y) sum(length(which(is.na(y)))))
+
+# Now join the two summary datasets together:
+table_3_data<- RDoF_labels_summary %>% bind_cols(Mean2, SD2, Median2, NAcount2) %>% # add our data
+  as.data.frame() %>%
+   transmute(Item = ...1,
+             Mean = V1...2,
+             SD = V1...3,
+             Median = V1...4,
+             "NA (N)" = ...5) %>%
+  bind_cols(Mean3, SD3, Median3, NAcount3) %>% # add data from Bakker et al.
+            dplyr::rename( # using the package name first for this function seems to avoid it being overridden by something else and not working after using it a few times
+             Mean2 = V1...6,
+             SD2 = V1...7,
+             Median2 = V1...8,
+             "NA2 (N)" = ...9)
+
+linebreak("a\nb") # Need to Remove all code relating to line breaks for HTML version
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Now create table:
+table_3_data %>%
+mutate_all(linebreak) %>%
+kbl( # For HTML version, remove code above and insert dataset here
+    digits = 2,
+     booktabs = T,
+     # linesep = '\\addlinespace',
+    align = c("l","c","c","c","c","c","c","c","c"),
+    caption = "Preregistration specificity: Summary of specificity scores for gambling and cross-disciplinary preregistrations",
+    col.names = linebreak(c("Researcher Degrees of Freedom (RDoF)",
+                  "Mean",
+                  "$SD$",
+                  "Median",
+                  "NA (n)",
+                  "Mean",
+                  "$SD$",
+                  "Median",
+                  "NA (n)")),
+     escape = F
+   ) %>%
+  kable_styling(font_size = 7,
+  latex_options = "striped") %>%
+    # kable_styling(font_size = 7,
+    #             latex_options = c("striped", "HOLD_position")) %>% # Hold position instruction keeps the table where we want it when using "man" output style (otherwise it puts it at the end of the doc)
+   # kable_classic(full_width = F, html_font = "Garamond") %>% # If wanting to produce a nice HTML image of this table then add this in and remove the styling chunk of code above.
+    row_spec(0, align = "c") %>% # Align the header row (may need to remove this for the html image as it doesn’t appear to render well in the plot viewer)
+  # column_spec(1, width = "0.5cm") %>%
+  # column_spec(2, width = "3.5cm") %>%
+  pack_rows("Hypotheses", 1, 2) %>%
+  pack_rows("Study design", 3, 9) %>%
+  pack_rows("Data collection", 10, 13) %>%
+  pack_rows("Analysis", 14, 28) %>%
+  pack_rows("Reporting hypotheses", 29, 29) %>%
+add_header_above(c(" " = 1, "Gambling preregistrations,\nN = 53" = 4, "Cross-disciplinary pre-\nregistrations, N = 52" = 4))
+
+```
+
+
+## Frequency of RDoF scores plot
+Now let's recreate the frequency plot Figure 2 with our recoded values:
+```{r message=FALSE, warning=FALSE, results = FALSE}
+
+
+# Arrange the data for plotting: 
+data_rdof_format_items_graph <- data_rdof_format_items_recoded %>% 
+  # Change so that scores are in one column with corresponding item no.s in a second column
+  pivot_longer(c(T1,T2,D1,D2,D3,
+                         D4,D5,D6,D7,C1,
+                         C2, C3,C4,A1,A2,
+                         A3,A4,A5,A6,A7,A8,
+                         A9,A10, A11,A12,
+                         A13,A14,A15,
+                         R6), 
+               names_to = "RDoF_Item",
+               values_to = "Score") %>%
+    as.data.frame() 
+  
+# Now add summary labels that can be used for the y Axis instead of the RDoF codes (as requested by a reviewer):
+
+data_rdof_format_items_graph$RDoF_Item<- recode_factor(data_rdof_format_items_graph$RDoF_Item,
+                          T1 = "T1: Hypothesis",
+                          T2 = "T2: Direction of hypothesis",
+                          D1 = "D1: Multiple manipulated IVs",
+                          D2 = "D2: Additional variables",
+                          D3 = "D3: Multiple DV measures",
+                          D4 = "D4: Additional constructs",
+                          D5 = "D5: Adding exclusion variables",
+                          D6 = "D6: Power analysis",
+                          D7 = "D7: Sampling plan",
+                          C1 = "C1: Random assignment",
+                          C2 = "C2: Blinding",
+                          C3 = "C3: Data handling/collection",
+                          C4 = "C4: Stopping rule",
+                          A1 = "A1: Missing data",
+                          A2 = "A2: Data pre-processing",
+                          A3 = "A3: Statistical ssumptions",
+                          A4 = "A4: Outliers",
+                          A5 = "A5: DV measure selection",
+                          A6 = "A6: DV scoring",
+                          A7 = "A7: Primary outcome selection",
+                          A8 = "A8: IV selection",
+                          A9 = "A9: Defining Manipulated IVs",
+                          A10 = "A10: Adding additional IVs",
+                          A11 = "A11: Defining non-manipulated IVs",
+                          A12 = "A12: Eligibility criteria",
+                          A13 = "A13: Statistical model selection",
+                          A14 = "A14: Method & package",
+                          A15 = "A15: Inference criteria",
+                          R6 = "R6: HARKing")
+
+data_rdof_format_items_graph$RDoF_Item <- as.factor(data_rdof_format_items_graph$RDoF_Item)
+
+data_rdof_format_items_graph$RDoF_Item<- factor(data_rdof_format_items_graph$RDoF_Item,
+                                c(
+                                  "T1: Hypothesis",
+                     "T2: Direction of hypothesis",
+                     "D1: Multiple manipulated IVs",
+                     "D2: Additional variables",
+                     "D3: Multiple DV measures",
+                     "D4: Additional constructs",
+                     "D5: Adding exclusion variables",
+                     "D6: Power analysis",
+                     "D7: Sampling plan",
+                     "C1: Random assignment",
+                     "C2: Blinding",
+                     "C3: Data handling/collection",
+                     "C4: Stopping rule",
+                     "A1: Missing data",
+                     "A2: Data pre-processing",
+                     "A3: Statistical ssumptions",
+                     "A4: Outliers",
+                     "A5: DV measure selection",
+                     "A6: DV scoring",
+                     "A7: Primary outcome selection",
+                     "A8: IV selection",
+                     "A9: Defining Manipulated IVs",
+                     "A10: Adding additional IVs",
+                     "A11: Defining non-manipulated IVs",
+                     "A12: Eligibility criteria",
+                     "A13: Statistical model selection",
+                     "A14: Method & package",
+                     "A15: Inference criteria",
+                     "R6: HARKing")) # Keep the right order for factor levels
+                        
+
+p1_recoded <- data_rdof_format_items_graph %>%
+  ggplot(aes(x=Score , y= reorder(RDoF_Item, desc(RDoF_Item)), fill = RDoF_Item)) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient", calc_ecdf = TRUE,
+    # position = position_nudge(x = .6, y = -.17),
+    scale = 1.5
+  ) +
+  scale_x_continuous(name = "Specificity score", limits = c(-1, 3), breaks = c(0, 1, 2)) +
+  scale_y_discrete(name = "Researcher Degrees of Freedom code") +
+  scale_fill_viridis_d()  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text = element_text(color = "black", size = 8.5, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.title.x = element_text(color="black", size=10, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=10, face="plain",
+                                    # vjust = -3.5,
+                                    family = "Cormorant Garamond")) +
+    theme(axis.text.y = element_text(vjust = -.6))+
+    ggtitle("Gambling 
+preregistrations")+
+  theme(plot.title = element_text(size = 10, hjust = 0.5,color="black", family = "Cormorant Garamond")) +
+  theme(legend.position = "none")
+
+
+table(data_rdof_format_items_graph)
+
+# Now Bakker et al.: -------------
+
+#Arrange the data for plotting (without semantic labels to minimise text)
+
+Bakker.data_graph <- Bakker_data_recoded %>% 
+  filter(Preregistration_group == 1) %>%
+  select(T1:R6)  %>%
+pivot_longer(c(T1, T2,D1,D2,D3,
+                         D4,D5,D6,D7,C1,
+                         C2, C3,C4,A1,A2,
+                         A3,A4,A5,A6,A7,A8,
+                         A9,A10, A11,A12,
+                         A13, A14, A15,
+                         R6), 
+               names_to = "RDoF_Item",
+               values_to = "Score") %>%
+  as.data.frame() 
+
+Bakker.data_graph$RDoF_Item <- as.factor(Bakker.data_graph$RDoF_Item)
+
+Bakker.data_graph$RDoF_Item<- factor(Bakker.data_graph$RDoF_Item,
+                                c("T1", "T2",
+                         "D1","D2","D3", "D4",
+                         "D5","D6", "D7","C1",
+                         "C2","C3","C4", "A1","A2","A3","A4","A5","A6","A7","A8",
+                         "A9","A10","A11","A12", "A13","A14",
+                         "A15","R6")) # Re-order factor levels
+
+p2_recoded <- Bakker.data_graph %>%
+  ggplot(aes(x=Score , y= reorder(RDoF_Item, desc(RDoF_Item)), fill = RDoF_Item)) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient", calc_ecdf = TRUE,
+    # position = position_nudge(x = .6, y = -.17),
+    scale = 1.5
+  ) +
+  scale_x_continuous(name = expression("Specificity score", symbol('\256')), limits = c(-1, 3), breaks = c(0, 1, 2)) +
+  scale_y_discrete(name = "") +
+  scale_fill_viridis_d()  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text = element_text(color = "black", size = 9.5, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.title.x = element_text(color="black", size=10, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+   theme(axis.text.y = element_blank()) +
+  # theme(axis.title.y = element_text(color="black", size=10, face="plain",
+  #                                   # vjust = 2.5, 
+  #                                   family = "Cormorant Garamond")) +
+  # theme(axis.text.y = element_text(vjust = -.6))+
+    ggtitle("Cross-discplinary
+preregistrations 
+(Bakker et al., 2020)") +
+  theme(plot.title = element_text(size = 10, hjust = 0.5,color="black", family = "Cormorant Garamond")) +
+  theme(legend.position = "none")
+  
+```
+
+Now join these plots together for easy comparisons between the samples:
+```{r message=FALSE, warning=FALSE, fig.align = 'center', fig.height = 8, fig.width = 6}
+
+# Create basic plot:
+Fig2_recoded <-  p1_recoded + p2_recoded 
+# Draw on arrow:
+Fig2.1_recoded <- ggdraw() +
+  draw_plot(Fig2_recoded) +
+  draw_image("arrow.png", scale = .4,
+             x = 0.2, y = -0.5) 
+# Add annotation:
+Fig2.1_recoded + plot_annotation(
+  caption = 'Larger scores indicate greater specificity
+  
+  ') & 
+   theme(plot.caption = element_text(family = 'Cormorant Garamond', hjust = 0.85, vjust = 1.8, face = "italic", size = 10))
