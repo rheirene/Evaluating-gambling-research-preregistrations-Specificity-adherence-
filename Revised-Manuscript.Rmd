@@ -1,0 +1,1318 @@
+---
+title             : "Preregistration specificity & adherence: A review of preregistered gambling studies & cross-disciplinary comparison"
+shorttitle        : "PRE-PRINT: Evaluating preregistration practices"
+
+author: 
+  - name          : "Robert M. Heirene"
+    affiliation   : "1, 2"
+    corresponding : yes    # Define only one corresponding author
+    address       : "College of Health and Human Sciences, Charles Darwin University, Darwin, Northern Territory, Australia, 8010"
+    email         : "robheirene@gmail.com"
+    role:         # Contributorship roles (e.g., CRediT, https://casrai.org/credit/)
+      - Conceptualization (equal)
+      - Project administration (lead)
+      - Methodology (equal)
+      - Investigation (equal)
+      - Formal analysis (lead)
+      - Visualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing (equal)
+      
+  - name          : "Debi A. LaPlante"
+    affiliation   : "3"
+    role:
+      - Conceptualization (equal)
+      - Funding acquisition
+      - Methodology (equal)
+      - Writing - Review & Editing (equal)
+      - Supervision (equal)
+      
+  - name          : "Eric R. Louderback"
+    affiliation   : "3"
+    role:
+      - Conceptualization (equal)
+      - Methodology (equal)
+      - Formal analysis (support)
+      - Writing - Review & Editing (equal)
+      
+  - name          : "Brittany Keen"
+    affiliation   : "2"
+    role:
+      - Project administration (support)
+      - Data curation (lead)
+      - Investigation (equal)
+      - Writing - Review & Editing
+      
+  - name          : "Marjan Bakker"
+    affiliation   : "4"
+    role:
+      - Methodology (equal)
+      - Data curation (support)
+      - Writing - Review & Editing (equal)
+      
+  - name          : "Anastasia Serafimovska"
+    affiliation   : "2"
+    role:
+      - Project administration (support)
+      - Data curation (support)
+      - Investigation (equal)
+      - Writing - Review & Editing (equal)
+        
+  - name          : "Sally M. Gainsbury"
+    affiliation   : "2"
+    role:
+      - Conceptualization (equal)
+      - Methodology (equal)
+      - Writing - Review & Editing (equal)
+      - Supervision (equal)
+     
+affiliation:  
+  - id            : "1"
+    institution   : "College of Health and Human Sciences, Charles Darwin University, Australia"
+  - id            : "2"
+    institution   : "School of Psychology, Brain & Mind Centre, University of Sydney, Australia"
+  - id            : "3"
+    institution   : "Division on Addiction, Harvard Medical School, USA"
+  - id            : "4"
+    institution   : "Methods and Statistics Department, Tilburg University, Netherlands"
+
+authornote: | 
+    All materials associated with this study can be accessed on our Open Science Framework page, including the preregistration, scoring protocols, raw datasets, analysis scripts, and the RMarkdown script used to create this manuscript: https://osf.io/n8rw3/
+
+# note: "\\clearpage" # Add this in when using the "man" output style as this ensures the Author note starts clean on a new page
+
+  
+keywords          : "Preregistration; Open Science; Gambling; Addiction; Meta-science; Researcher degrees of freedom."
+wordcount         : ""
+
+bibliography      : ["Prereg study refs.bib"]
+
+floatsintext      : true
+tables            : yes # added to help render kable tables in pdf/latex
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : no
+mask              : no
+draft             : no
+noextraspace      : true # Added to remove white space in man version of manuscript
+
+csl               : "apa.csl" # Added updated apa7 csl file to main folder to get this to work
+documentclass     : "apa7" # updated to apa7 from apa6
+# documentclass     : "apa6"
+# classoption       : "man"
+classoption       : "doc"
+output            : papaja::apa6_pdf
+# output: word_document # Add this if wanting to render in word (tables don't appear in current form)
+# always_allow_html: true # Add this if wanting to render in word (tables don't appear in current form)
+
+
+header-includes   :
+- \usepackage{setspace}
+- \captionsetup[figure]{font={stretch=1,footnotesize}}
+- \usepackage{booktabs}
+- \usepackage{longtable}
+- \usepackage{array}
+- \usepackage{multirow}
+- \usepackage{wrapfig}
+- \usepackage{float}
+- \usepackage{colortbl}
+- \usepackage{pdflscape}
+- \usepackage{tabu}
+- \usepackage{threeparttable}
+- \usepackage{threeparttablex}
+- \usepackage[normalem]{ulem}
+- \usepackage{makecell}
+- \usepackage{xcolor}
+- \raggedbottom # Added to remove white space in "man" version of manuscript
+
+---
+
+```{r setup, include = FALSE, results = FALSE, warnings = FALSE, echo = FALSE}
+# Some key system things to install when first running this script:
+# tinytex::install_tinytex()
+# if(!"tinytex" %in% rownames(installed.packages())) install.packages("tinytex")
+
+# tinytex::install_tinytex
+# PAPAJA:
+# Install devtools package if necessary
+# if(!"devtools" %in% rownames(installed.packages())) install.packages("devtools")
+# Install the stable development verions from GitHub
+# devtools::install_github("crsh/papaja")
+
+# For the citr tool used to add references:
+# devtools::install_github("crsh/citr")
+
+library("papaja")
+library("tidyverse")
+library("apa")
+library("english")
+options(kableExtra.latex.load_packages = FALSE) 
+library("kableExtra")
+library("gtsummary")
+library("showtext")
+library("sysfonts")
+# library("extrafont")
+# library ("extrafontdb")
+
+# For the citr tool used to add references:
+# devtools::install_github("crsh/citr")
+
+# Load fonts:
+font_add_google("Cormorant Garamond")
+showtext_auto()
+```
+
+```{r analysis-preferences, echo = FALSE}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+```{r Data-import, echo = FALSE, results = FALSE, warnings = FALSE, message = FALSE}
+load(file = "Outcomes.RData") # LOAD ALL RESULTS/OUTCOMES FROM R ENVIRONMENT
+```
+
+```{r spellcheck, echo = FALSE, results = FALSE, warnings = FALSE, message = FALSE}
+# Run spell check of ms.:
+
+# library("spelling")
+# library("pdftools")
+# 
+# spell_check_files("Manuscript.pdf", ignore = character(), lang = "en_US")
+```
+
+
+\newpage
+
+\begin{center}
+Abstract
+\end{center}
+
+> Study preregistration is one of several “open science” practices (e.g., open data, preprints) that researchers use to improve the transparency and rigour of their research. As more researchers adopt preregistration as a regular research practice, examining the nature and content of preregistrations can help identify strengths and weaknesses of current practices. The value of preregistration, in part, relates to the specificity of the study plan and the extent to which investigators adhere to this plan. We identified 53 preregistrations from the gambling studies field meeting our predefined eligibility criteria and scored their level of specificity using a 23-item protocol developed to measure the extent to which a clear and exhaustive preregistration plan restricts various researcher degrees of freedom (RDoF; i.e., the many methodological choices available to researchers when collecting and analysing data, and when reporting their findings). We also scored studies on a 32-item protocol that measured adherence to the preregistered plan in the study manuscript. We found that gambling preregistrations had low specificity levels on most RDoF. However, a comparison with a sample of cross-disciplinary preregistrations (N = 52; Bakker et al., 2020) indicated that gambling preregistrations scored higher on 12 (of 29) items. Thirteen (65%) of the 20 associated published articles or preprints deviated from the protocol without declaring as much (the mean number of undeclared deviations per article was 2.25, *SD* = 2.34). Overall, while we found improvements in specificity and adherence over time (2017-2020), our findings suggest the purported benefits of preregistration—including increasing transparency and reducing RDoF—are not fully achieved by current practices. Using our findings, we provide 10 practical recommendations that can be used to support and refine preregistration practices. 
+
+
+\newpage
+
+# Introduction
+
+A preregistration is a time-stamped, immutable document posted on an online repository that outlines the details of a proposed research study, including the hypotheses, methods, outcomes of interest, and data analysis plan. Historically, preregistration has been used primarily for randomised control trials (RCTs) and later for systematic reviews and meta-analyses [@dickersinRegisteringClinicalTrials2003; @stewartWhyProspectiveRegistration2012]. More recently, researchers performing other forms of quantitative and qualitative studies [@havenPreregisteringQualitativeResearch2019] have begun to adopt this practice, and the number of researchers preregistering these types of studies is increasing year-on-year [@kuperschmidtMoreMoreScientists2018], with 17,000 new preregistrations posted on the online repository Open Science Framework (OSF) in 2020 alone [@centreforopenscienceImpactReport20202020]. This trend has been largely prompted by concerns regarding the replicability and reproducibility of the extant literature  [@allenOpenScienceChallenges2019; @simmonsFalsePositivePsychologyUndisclosed2011], and preregistration is one of several practices (e.g., open data, preprints) that researchers are using to improve the transparency and rigour of their research as a part of the *open science movement*. 
+
+Proponents of study preregistration have advanced three overlapping and mutually compatible perspectives regarding its value. First, preregistration increases transparency [@nosekPreregistrationRevolution2018]. Transparency in the research process has multiple benefits, such as improving the ability to detect questionable research practices (QRPs; e.g., selective outcome reporting) and publication bias [@norrisSelectiveOutcomeReporting2012; @munafoManifestoReproducibleScience2017], and enabling the differentiation of planned, *a priori* analyses from unplanned, *post hoc* analyses [@nosekPreregistrationHardWorthwhile2019]. 
+
+Second, preregistration assists with reducing Researcher Degrees of Freedom (RDoF)—that is, the many methodological choices available to researchers when collecting, analysing, and reporting their findings [@bakkerEnsuringQualitySpecificity2020; @wichertsDegreesFreedomPlanning2016]. Reducing RDoF can be important as the freedom to make data-contingent decisions during the research process (e.g., when deciding which inference criteria to use or how to deal with outliers) can inflate the risk of finding false-positive results or Type-I errors [@wichertsDegreesFreedomPlanning2016], which when done strategically is known as *p-hacking* or *asterisk hunting* [@headExtentConsequencesPHacking2015]. 
+Third, Lakens (2019; p. 1) argues that preregistration is valuable as it allows for “*others to transparently evaluate the capacity of a test to falsify a prediction*”. The degree to which a test is capable of falsifying a prediction is termed its “severity” and, as Lakens discusses, more severe tests are more impressive and indicative of a solid theoretical underpinning [^1]. Several QRPs can reduce the severity of tests by reducing the likelihood of researchers being able to falsify their hypothesis, including optional stopping (i.e., continuously checking & analysing data during the collection phase & only stopping when a statistically significant result is observed) and HARKing (Hypothesising after the results are known). Thus, readers can better evaluate the severity of tests reported in preregistered compared to non-preregistered studies as these QRPs can be more easily detected in the former [@lakensValuePreregistrationPsychological]. 
+
+[^1]: For example, if a researcher studying behavioural addictions predicts that a sample of problem gamblers will differ from non-problem gamblers on one personality index of a multidimensional measure, without specifying which specific index will differ or the direction or magnitude of the effect, then the test of this claim will lack severity as it is highly unlikely that the difference between the two samples will be exactly zero on all indices (the test lacks severity, not the claim). If, by contrast, the researcher predicts that the samples will only differ in extraversion levels, with the problem gambling sample displaying a mean score of 2-4 points higher than non-problem gamblers, the test of this claim will be high in severity as it is highly capable of being falsified.
+
+While we focus on just three possible benefits of preregistration above, many others have been proposed. For example, @rubinDoesPreregistrationImprove2020 lists 17 potential benefits–including tangential or secondary benefits such as reducing publication bias and increased reporting of null results. However, Rubin questions whether some of these benefits may be equally or better achieved by other means (e.g., transparent reporting at publication). Further, several arguments against study preregistration have been made, including that the practice is time consuming (for authors to write and reviewers to evaluate), it discourages exploratory research or serendipitous findings, and pre-specified study plans can be flawed [@phamPreregistrationNeitherSufficient2021]. A comprehensive discussion of the potential advantages and disadvantages of preregistration is the beyond the scope of this article, so we refer interested readers to the article by @simmonsPreregistrationGameChanger2021.
+
+
+Despite ongoing debate, the limit available evidence supports the value of study preregistration. Preregistration of RCTs has aided in the detection of outcome switching [@chenComparisonClinicalTrial2019; @vassarEvaluationSelectiveOutcome2020] and appears to have resulted in an increase in published null findings, indicating a potential reduction the likelihood of statistical false-positives [@kaplanLikelihoodNullEffects2015]. Preliminary evidence shows that the effect sizes reported in preregistered studies in the psychology literature are considerably smaller than non-registered studies, suggesting the latter contain effects that are inflated by QRPs and publication bias [@schaferMeaningfulnessEffectSizes2019]. Yet, the value of preregistration is limited by at least two factors. First is the degree to which preregistrations specifically describe all aspects of the planned study. If key study details like hypotheses, primary outcomes, sampling procedures, and analysis plans are not clearly and comprehensively specified, then the many benefits of preregistration listed above fail to materialize. Second is the extent to which researchers actually follow (i.e., adhere to) their pre-specified plans and declare any deviations [@naturehumanbehaviourTellItIt2020]. If, post-preregistration, a researcher changes their criterion for outlier removal or the cut-off score used to divide groups and fails to declare such deviations, the anticipated benefits of the practice (i.e., restricted RDoF and, to some extent, transparency) are again diminished.
+
+To date, three studies have evaluated modern study preregistration practices according to the specificity of the research plans and the degree to which the researchers adhered to them. @bakkerEnsuringQualitySpecificity2020 examined the specificity of preregistrations registered on OSF (osf.io) during 2016 that used either structured or unstructured templates. The authors adapted the list of RDoFs developed by @wichertsDegreesFreedomPlanning2016 to create a scoring protocol that assessed the extent to which the preregistration restricted each RDoF (e.g., "Deciding on how to deal with outliers in an *ad hoc* manner") by being “*specific*” (i.e., all phases of research process are described), "*precise*" (i.e., descriptions of the research plan can only be interpreted in one way), and "*exhaustive*" (i.e., explicit acknowledgment that the plan will not be deviated from). We use the term specificity here as shorthand for these three principles. Bakker and colleagues found that specificity was higher in the sample using a structured template but was relatively low for both samples, particularly regarding the selection of measured variables and covariates.
+
+@claesenPreregistrationComparingDream2019 investigated 16 articles published in *Psychological Science* between 2015 and 2016 with 27 corresponding preregistrations (some articles contained multiple, separately preregistered studies). They assessed whether the authors of these publications adhered to their preregistrations in eight areas (e.g., exclusion criteria, statistical model), finding that 26 articles (96%) included at least one deviation that was not declared. Only one study disclosed all deviations, and all studies deviated from their preregistration in one of the eight areas. @ofosuPreanalysisPlansStocktaking2019 evaluated 195 preregistrations from the economics and political science fields registered between 2011 and 2016. Only 49.7% of the sample were judged to contain sufficiently detailed descriptions of the four key areas they deemed necessary for a complete preregistration (i.e., hypotheses, primary dependent variables, treatments or independent variables, & the statistical model[s] to be tested). Of the 95 preregistrations with a corresponding published article, more than a third failed to include at least one preregistered hypothesis and 18% presented tests of unregistered hypotheses.
+
+Collectively, the findings from @bakkerEnsuringQualitySpecificity2020, @claesenPreregistrationComparingDream2019, and @ofosuPreanalysisPlansStocktaking2019 highlight a need to continue to examine preregistration practices and how they can be improved in order to maximise the potential scientific benefits of preregistration. In the present study, we aimed to better understand the strengths and weaknesses of more recent preregistration practices (i.e., for 2017 onwards). We did this by simultaneously determining the degree to which researchers studying gambling sufficiently specify all aspects of their studies in preregistrations and the extent to which they adhere to their pre-specified plans. Preregistered studies from the gambling field were selected as the sample for two reasons. First, most of our research team are experienced gambling researchers, which uniquely positioned us to determine whether all relevant details were specified when describing the use of field-specific measures and datasets (e.g., online gambling account data). Second, the gambling field is fraught with concerns regarding impartiality and QRPs due to the frequent involvement of the gambling industry in funding and supporting research [@livingstoneProblemGamblingResearch2014], and open science practices such as preregistration have been proposed as a strategy to combat the risk of bias when undertaking industry-supported research [@louderbackIntegratingOpenScience2020]. Accordingly, we aimed to understand how effectively gambling researchers are currently preregistering their studies by comparing their preregistration specificity scores (according to Bakker et al.’s [2020] scoring protocol) with the specificity scores recorded for the randomly selected, cross-disciplinary preregistrations in Bakker and colleagues’ study. As the discussion of open science principles and practices in the gambling field has been limited until recently [@blaszczynskiEditorNoteReplication2019; @heireneCallReplicationsAddiction2020; @heireneCanOpenScience2020; @laplanteReplicationFundamentalIt2019; @louderbackIntegratingOpenScience2020; @wohlNeedOpenScience2019], we hypothesized that preregistrations of gambling-focused research studies would have lower specificity levels (i.e., have lower scores on the RDoF scoring protocol) than the cross-disciplinary sample.
+
+# Methods
+The hypotheses, methods, and analysis plan for this study were preregistered on OSF (https://osf.io/3jy6q). Unless otherwise stated, we adhered to the methods outlined in our preregistration. We have included a “Deviations from preregistration” subsection later in the methods section outlining any major deviations from our preregistration and minor deviations are presented in footnotes. The study data, analysis scripts, and materials, including details of transparent changes, can all be accessed on our [_OSF page_](https://osf.io/n8rw3/) (our project’s [_OSF Wiki_](https://osf.io/n8rw3/wiki/home/) lists and describes all documents related to this study).
+
+## Search & Selection Process
+Our complete process of searching for and selecting registrations is presented in Figure 1. We searched the OSF repository (www.osf.io) on three occasions throughout 2020 for preregistrations of gambling studies by searching the terms “gambling”, “wagering”, and “betting” separately. To be included, a preregistration had to:
+
+-	outline the plan for a study that was primarily focused on a gambling-related concept or concepts; 
+-	be written in English; 
+-	report at least one hypothesis;
+-	not be for a review and/or meta-analytic study as these studies involve unique forms of RDoF and risks of bias that would require a separate scoring system [e.g., PRISMA-P; @moherPreferredReportingItems2015];
+-	not be for a clinical trial ([defined according to the National Institute of Health](https://grants.nih.gov/policy/clinical-trials/definition.htm) as the prospective placement of participants to an experimental condition using randomisation methods and testing the effects of an intervention) as these also involve unique forms of RDoF and risks of bias that would require a separate scoring system[^2] [e.g., CONSORT; @schulzCONSORT2010Statement2010].
+
+[^2]: We decided this at the preregistration stage and, in retrospect, we believe the specificity scoring protocol used would be suitable for evaluating the specificity of clinical trial preregistrations as well.
+
+OSF searches and the selection of preregistrations were performed by BK. RH checked 20% of included and excluded registrations for the accuracy of the selection process according to the above eligibility criteria and agreed with all original selection decisions. In our preregistration we stated that a second researcher would only check 10% of included & excluded registrations but we decided to review a larger sample of selections to ensure the accuracy of the process. 
+
+<!-- Figure 1 -->
+![**Flow-chart: Identification & selection of preregistrations.**
+*Note:* This PRISMA-style flowchart presents the process of identifying and selecting our sample of preregistrations. Eligibility criteria are presented in order in which they were applied during the selection process. *Random selection performed using a random number generator (the R script used for this is shared on OSF: https://osf.io/scmqt). \label{fig1}](Figures/fig1_flowchart.pdf)
+
+## Sample Size Determination
+To compare our sample with the 52 cross-disciplinary preregistrations analysed by @bakkerEnsuringQualitySpecificity2020 and thereby test our hypothesis, we aimed to include a minimum of 53 gambling study preregistrations. This was based on an *a priori* power analysis conducted using G\*Power V3.1.9.4 for a one-tailed, normal parent distribution, Wilcoxon-Mann-Whitney test with power of 0.80, an effect size of 0.5 (*d*, which corresponds to a Cliff's D [the effect size we report] of ~0.33), and alpha ($\alpha$) at 0.05, which estimated that 53 preregistrations per group (N = 106 overall; 53 gambling and 53 cross-disciplinary studies) would be required (Bakker et al. originally selected 53 preregistrations for evaluation but had to remove one as it was withdrawn from OSF). Our effect size was based on Bakker and colleagues' suggestion that a medium effect (*d* = 0.5) is indicative of a practically meaningful difference between two samples of preregistrations. As Bakker et al. only included 52 preregistrations, we conducted a *post-hoc* power analysis to determine our obtained power using the specifications for our *a priori* calculation. Our actual power was 0.79, slightly less than the desired value of .80 (our *a priori* and *post-hoc* power analysis protocols can be found on OSF: https://osf.io/dnfqa). 
+
+We needed to conduct three separate searches of the OSF repository between March and October 2020 in order to identify 53 preregistrations meeting our criteria (see Figure 1). We did not summarise or analyse the data until all 53 preregistrations were identified and coded by two researchers. Although there were 55 gambling preregistrations meeting our eligibility criteria available on OSF at the time of our third and final search (see Figure 1), we restricted our sample size to the number provided by our *a priori* power analysis.
+
+
+## Sample Description
+
+<!-- Table 1 - Sample characteristics -->
+```{r message=FALSE, warning=FALSE}
+# Create a table that summarises the characteristics of the samples. USe gtsummary package:
+
+# https://github.com/ddsjoberg/gtsummary
+# http://www.danieldsjoberg.com/gtsummary/articles/rmarkdown.html
+
+combineddata$Preregistration_group <-  as.factor(combineddata$Preregistration_group)
+
+# Wrangle data:
+combineddata.characteristics <-  combineddata %>%
+  select(Preregistration_group,
+         Template = Registration.type.format,
+         Year) %>%
+   mutate(Preregistration_group  = fct_recode(Preregistration_group,
+                                              "Cross-disciplinary" = "1",
+                                              "Gambling" = "2"))  %>%
+   mutate(Template  = fct_recode(Template,
+                                              "OSF Preregistration (formerly 'Prereg Challenge')" = "Prereg Challenge",
+                                              "OSF Preregistration (formerly 'Prereg Challenge')" = "OSF Preregistration"))
+
+# Create table:
+ tbl_summary(
+    combineddata.characteristics,
+    by = Preregistration_group ) %>% # split table by group
+  modify_header(label = "**Variable**") %>% # update the column header
+   modify_footnote(update = everything() ~ NA) %>%
+
+  as_kable_extra(booktabs = T,
+                 linesep = c('', '', '', '', '\\addlinespace','', '', '', '', '', '', ''),
+                  align = c("l", "c","c"),
+                 caption = "Sample characteristics")  %>%
+    kable_styling(font_size = 7,
+                latex_options = "striped") %>%
+    row_spec(1, bold = TRUE) %>%
+    row_spec(6, bold = TRUE) %>%
+    add_header_above(c("", "Preregistration sample" = 2)) %>%
+    footnote(general = "Statistics presented: n(%)")
+ 
+ 
+ # Old code:
+ #    tbl_summary(
+ #    combineddata.characteristics,
+ #    by = Preregistration_group, # split table by group
+ #  options(gtsummary.tbl_summary.percent_fun = function(x) style_number(x * 100, digits = 1))) %>%
+ #  modify_header(label = "**Variable**") %>% # update the column header
+ #   modify_footnote(update = everything() ~ NA) %>%
+ # 
+ #  as_kable_extra(booktabs = T,
+ #                 linesep = c('', '', '', '', '\\addlinespace','', '', '', '', '', '', ''),
+ #                  align = c("l", "c","c"),
+ #                 caption = "Sample characteristics")  %>%
+ #    kable_styling(font_size = 7,
+ #                latex_options = "striped") %>%
+ #    row_spec(1, bold = TRUE) %>%
+ #    row_spec(6, bold = TRUE) %>%
+ #    add_header_above(c("", "Preregistration sample" = 2)) %>%
+ #    footnote(general = "Statistics presented: n(%)")
+```
+
+The characteristics of our sample are presented in Table 1 alongside the characteristics of the 52 cross-disciplinary preregistrations evaluated by @bakkerEnsuringQualitySpecificity2020 for comparison. None of the preregistrations were for Rregistered Reports. We extracted the design and overarching research question for preregistered gambling studies (https://osf.io/ad6wj). Overall, experimental studies were most common (N = `r design_summary %>% group_by(Design) %>% count() %>% filter(Design == "Experimental") %>% ungroup() %>% select(n)`), followed by cross-sectional (N = `r design_summary %>% group_by(Design) %>% count() %>% filter(Design == "Cross-sectional") %>% ungroup() %>% select(n)`), cohort (N = `r design_summary %>% group_by(Design) %>% count() %>% filter(Design == "Cohort study") %>% ungroup() %>% select(n)`), and longitudinal survey studies (N = `r design_summary %>% group_by(Design) %>% count() %>% filter(Design == "Longitudinal survey") %>% ungroup() %>% select(n)`; we were unable to identify the design for one preregistered study. Examples of research questions asked included: "How did the COVID-19 lockdowns affect gambling participation in Australia?", "Does the presence of unclaimed prize information result in a greater urge to gamble along with higher frequencies of scratch card play?", and "What is the  role of debt stress in the relationship between gambling participation and mental health comorbidities?". The data for the cross-disciplinary sample studied by Bakker et al. were accessed from the authors’ [_OSF page_](https://osf.io/fgc9k/)[^3]. All of these preregistrations were posted on OSF as part of the “Preregistration Challenge” (or “Prereg Challenge”), a competition held between 2015 and 2018 by the Centre for Open Science. The competition aimed to increase researchers’ experience with preregistration and required participants to use a highly structured template to preregister their studies (a cash prize of $1,000 was awarded to all researchers who preregistered their studies using this template and published their findings in an eligible journal). The template asked researchers 26 questions about their planned study, including the research questions, hypotheses, sampling plan, variables, design, and analysis plan. This template remains available on OSF as the “OSF Preregistration” format (the form can be accessed [_here_](https://docs.google.com/document/d/1T25vXrpsHS8NzRsvNhqIPK1LgYYtoN8jFF_iyLedM-s/template/preview?usp=drive_web)).
+
+[^3]: Bakker et al.'s OSF page: https://osf.io/fgc9k/. The sample we extracted & studied here are labelled as group "1" in Bakker et  al.'s R data file.
+
+@bakkerEnsuringQualitySpecificity2020 labelled the Prereg Challenge template as a "structured format", compared to the "[_Standard Pre-Data Collection_](https://docs.google.com/document/d/1z1FegO0xODofIhCYYcbYw5fphWgbz7vYlXGjr281-R4/edit)" template which they labelled an “unstructured format” as it only contains two questions that ask authors whether they have began data collection and whether they have looked at data. We compared our sample with Bakker et al.'s structured format preregistrations instead of their unstructured sample as our preliminary scans of OSF indicated that the OSF Preregistration format was most commonly used by gambling researchers. This template was the most frequently used format in our final sample (Table 1). There was no overlap between the two samples.
+
+
+## Scoring Preregistration Specificity
+
+
+<!-- Table 2 - RDoF & Pre-reg scoring protocol -->
+```{r message=FALSE, warning=FALSE}
+# Create a table that summarises the RDoF from Wicherts et al. (2016) and the associated pre-reg scoring protocol from Bakker et al. (2020)
+
+
+RDoF_codes<- c("T1", 
+               "T2",
+               "D1", 
+               "", 
+               "D2",
+               "D3",
+               "D4",
+               "D5",
+               "D6", 
+               "D7",
+               "C1",
+               "C2",
+               "C3",
+               "C4",
+               "A1",
+               "A2",
+               "A3",
+               "A4",
+               "A5",
+               "A6",
+               "A7",
+               "A8",
+               "A9",
+               "A10",
+               "A11",
+               "A12",
+               "A13",
+               "A14",
+               "",
+               "A15",
+               "R6")
+
+#  Create a character vector that provides summary versions of the RDoF from Witcherts et al. (2016):
+Summarised_rdof_item <- as.factor(c("Conducting exploratory research without any hypothesis",
+                                    "Studying a vague hypothesis that fails to specify the direction of the effect",
+                                    "Creating multiple manipulated independent variables and conditions",
+                                    "",
+                                    "Measuring additional variables that can later be selected as covariates, independent variables, mediators, or moderators",
+                                    "Measuring the same dependent variable in several alternative ways",
+                                    "Measuring additional constructs that could potentially act as primary outcomes",
+                                    "Measuring additional variables that enable later exclusion of participants from the analysis (e.g., awareness or manipulation checks)",
+                                    "Failing to conduct a well-founded power analysis",
+                                    "Failing to specify the sampling plan and allowing for running (multiple) small studies",
+                                    "Failing to randomly assign participants to conditions",
+                                    "Insufficient blinding of the participants and/or experiments",
+                                    "Correcting, coding, or discarding data during data collection in non-blinded manner",
+                                    "Determining the data collection stopping rule on the basis of desired results or intermediate significance testing",
+                                    "Choosing between different options of dealing with incomplete or missing data on ad hoc grounds",
+                                    "Specifying pre-processing of data (e.g., cleaning, normalization, smoothing, and motion correction) in an ad hoc manner",
+
+                                    "Deciding how to deal with violations of statistical assumptions in an ad hoc manner",
+                                    "Deciding on how to deal with outliers in an ad hoc manner",
+                                    "Selecting the dependent variable at several alternative measures of the same construct",
+                                    "Trying out different ways to score the chosen primary dependent variable",
+                                    "Selecting another construct as the primary outcome",
+                                    "Selecting independent variables out of the set of manipulated independent variables",
+                                    "Operationalising manipulated independent variables in different ways (e.g., by discarding or combining levels of factors)",
+                                    "Choosing to include different measured variables as covariates, independent variables, mediators, or moderators",
+                                    "Operationalising nonmanipulated independent variables in different ways",
+                                    "Using alternative inclusion and exclusion criteria for selecting participants in analyses",
+                                    "Choosing between different statistical models",
+                                    "Choosing the estimation method, software package, and computation of SEs",
+                                    "",
+                                    "Choosing inference criteria (e.g., Bayes factors, alpha level)",
+                                    "Presenting exploratory analyses as confirmatory (HARKing)"))
+
+# Create a summary label column for our table:
+RDoF_labels <- c("Hypothesis", "Direction of hypothesis",
+            "Multiple manipulated IVs",  "", "Additional IVs", "Multiple DV measures", "Additional constructs", "Additional exclusion variables", "Power analysis", "Sampling plan",
+            "Random assignment", "Blinding", "Data handling/collection", "Stopping rule",
+            "Missing data", "Data pre-processing", "Statistical assumptions", "Outliers", "Selected DV measured", "DV scoring", "Primary outcome selection", "IV selection", "Operationalising manipulated IVs", "Inclusion of additonal IVs", "Operationalising non-manipulated IVs", "Eligbility criteria", "Statisical model selection", "Method and package", "Inference criteria", "HARKing") # Don't include "&"s as this won't work in Latex
+
+#  Create a character vector that provides summary versions of the questions from the specificity scoring guide:
+Summarised_question <- as.factor(c("1: Is at least one hypothesis specified such that it is clear what are the IV(s) and DV(s)?",
+                               "2: Is the direction of the hypothesis specified?",
+                               "3: Does the text exclude the possibility that at least one of the manipulated variables will be omitted in the test of the hypothesis?",
+                               "4: Does it specify exactly how the manipulated variable will be used in the analysis to test the hypothesis?",
+                               "5: Does it exclude the possibility that at least one other variable (e.g., covariate) is included in the analysis?",
+                               "6: Does it specify which measurement instrument will be used as the main outcome variable?",
+                               "7: Does it specify that the confirmatory analysis section of the paper will not include another DV than the ones specified in all hypotheses? ",
+                               "8: Does the pre-registration indicate inclusion and exclusion criteria in selecting data points?",
+                               "9: Is a power analysis reported?",
+                               "10: Is the sampling protocol outlined, including the exact number of participants, recruitment strategy, eligibility criteria, and stopping rules?",
+                               "11: Is it specified how randomization is implemented?",
+                               "12: Does it describe procedures to blind participants to and/or experimenters to conditions?",
+                               "13: Does it include protocols concerning coding of data, discarding of cases, or correction of scores during data collection?",
+
+                               "Same as RDoF D7 (Question 10)",
+
+                               "14: Does it indicate how the study deals with incomplete or missing data?",
+                               "15: Does it offer a protocol for pre-processing the data when required (e.g., corrected for motion and other artifacts)?",
+                               "16: Does it indicate how to test for and deal with violations of statistical assumptions ?",
+                               "17: Does it indicate how to detect outliers and how they should be dealt with?",
+                               "Same as RDoF D4 (Question 6)",
+                               "18: Is the method used to measure the primary outcome variable(s) fully described?",
+
+                               "Same as RDoF D4 (Question 7)",
+                               "Same as RDoF D1 (Question 3)",
+                               "Same as RDoF D1 (Question 4)",
+                               "Same as RDoF D2 (Question 5)",
+
+                               "19: Are the methods to measure non-manipulated IV(s) fully described?",
+
+                               "Same as RDoF D5 (Question 8)",
+
+                               "20: Does it specify the statistical model(s) that will be used to test the hypothesis (e.g., logistic regression)?",
+                               "21a: Does it indicate details of the estimation technique used to estimate the statistical model and compute standard errors?",
+                               "21b: Does it specify which statistical software package and version is used for running the analyses?",
+                               "22: Does it indicate the inference criteria (e.g., Bayes factors, Alpha level)?",
+                               "Same as RDoFs T1 (Question 1) and D4 (Question 7)"))
+
+
+Table_2_data<- bind_cols(RDoF_codes,
+          Summarised_rdof_item,
+          # RDoF_labels,
+          Summarised_question) %>% as_tibble()
+
+
+
+kbl(Table_2_data,
+    # "latex", # For HTML version, remove code above and insert dataset here
+    digits = 2,
+    # align = c("c", "l", "c","c","c","c","c","c","c","c"),
+    caption = "Researcher degrees of freedom \\& associated preregistration specificity scoring protocol",
+    col.names = linebreak(c("Code",
+                  "Researcher Degrees of Freedom (RDoF)",
+                  "Associated preregistration specificity question")),
+     booktabs = T,
+     escape = F,
+    linesep = '',
+   ) %>%
+  kable_styling(font_size = 6.5,
+  latex_options = "striped") %>%
+   landscape() %>% # May need to remove in HTML version
+    # kable_styling(font_size = 7,
+    #             latex_options = c("striped", "HOLD_position")) %>% # Hold position instruction keeps the table where we want it when using "man" output style (otherwise it puts it at the end of the doc)
+   # kable_classic(full_width = F, html_font = "Garamond") %>% # If wanting to produce a nice HTML image of this table then add this in and remove the styling chunk of code above.
+    row_spec(0, align = "c") %>% # Align the header row (may need to remove this for the html image as it doesn’t appear to render well in the plot viewer)
+   # row_spec(0, align = "c") %>%
+  column_spec(1, width = "0.5cm") %>%
+  column_spec(2, width = "9.5cm") %>%
+  column_spec(3, width = "10.5cm") %>%
+  # pack_rows("Hypotheses", 1, 2) %>%
+  # pack_rows("Study design", 3, 9) %>%
+  # pack_rows("Data collection", 10, 13) %>%
+  # pack_rows("Analysis", 14, 28) %>%
+  # pack_rows("Reporting hypotheses", 29, 29) %>%
+  footnote(general = "Specificity questions are summarised here for space purposes. The scoring protocol containing all full questions can be found on our OSF page: https://osf.io/a34u7",
+  footnote_as_chunk = F)
+```
+
+We used Bakker et al.’s (2020) scoring protocol to evaluate the specificity of preregistrations. This contains 23 questions[^4] which provide scores for 29 RDoFs from Wicherts et al.'s (2016) checklist (all 29 RDoFs and the associated preregistration specificity scoring question are presented in Table 2). Thus, scores (i.e., specificity scores) represent the extent to which the preregistration restricts potential RDoFs arising during the research process. Specificity scores range between 0 and 3:
+
+[^4]: The original scoring protocol lists 22 questions, but one of these (Q21) has two questions (21a & 21b) with clearly distinct responses.
+
+- 0 = not specified: opportunistic use of RDoF not restricted at all.
+- 1 = some specification but lacking details: opportunistic use of RDoF is restricted to some extent[^5].
+- 2 = detailed specification: opportunistic use of RDoF is completely restricted, but no explicit statement confirming that authors will not deviate from this plan by adding additional methods/processes.
+- 3 = detailed specification and statement that authors will not deviate from their plan by adding additional methods/processes: opportunistic use of RDoF is completely restricted. For example, in a [_recent preregistration_](osf.io/6dpkw) written by two of the present authors, we outlined the reasons why a participant’s data may be excluded from analyses before stating: "Individuals will not be excluded from analyses for reasons other than those stated here."
+- N.A. = RDoF item not relevant to preregistration. 
+
+[^5]: For some RDoFs, there are fewer gradations of specificity possible & so scores of 1 are not possible for the RDoFs T1, T2, D1, D3, A2, A5, A8, & A9. For the same reason, scores of 1 & 2 are not possible for RDoFs D2, D4, A7, & A10.
+
+Like @bakkerEnsuringQualitySpecificity2020 and @ofosuPreanalysisPlansStocktaking2019, we counted the number of hypotheses proposed in each preregistration. Further, given concerns regarding many gambling researchers’ potential conflicts of interest due to their connections with industry and/or government, we also scored preregistrations on whether relevant disclosures were reported. We used the journal *International Gambling Studies'* (IGS) three-factor disclosure framework to structure our assessment. IGS’ framework requires authors to disclose [1] funding sources for the work, [2] any competing interests, and [3] any constraints on publishing the findings made by funders or stakeholders. We scored preregistrations on each of the three factors as either 0 (no mention) or 3 (relevant disclosure reported). 
+
+During the scoring process we found it necessary to add our own “decision rules" to Bakker and colleagues' (2020) protocol that helped inform how we scored particular questions and enhanced our consistency across preregistrations. For example, in order to obtain a score of two or higher on question 10 (corresponding to RDoFs D7 and C4), researchers need to specify various details of the sampling plan, including "*how many and how additional participants or data points are sampled when pre-set sample size is not reached?*”; however, many of the studies preregistered in our sample involved online convenience sampling with minimal criteria for eligibility and, as a result, these researchers had almost total control over the number of participants they recruited. Therefore, not reaching their pre-set sample size was not a concern for them and an associated plan did not need to be pre-specified. As such, we developed a decision rule which stipulated that preregistrations of these studies could score $\ge$ 2 for question 10, provided they had specified all other required details of their sampling plan. Our [_full scoring protocol_](https://osf.io/a34u7/), including these decisions rules, is shared on OSF and the original protocol by Bakker et al. can be accessed on their [_OSF page_](https://osf.io/v8yt4/).
+
+
+## Scoring Preregistration Adherence 
+We developed a protocol for scoring gambling researchers' adherence to their preregistrations with 32 questions—29 corresponding to the 29 RDoFs and three corresponding to disclosures (i.e., funding, conflicts of interest, & constraints on publishing). For example, for RDoF A1 (“*Choosing between different options of dealing with incomplete or missing data on ad hoc grounds*”) we asked: “*Are the procedures used to deal with missing data consistent with those reported in the preregistration?*”. Our [_full adherence scoring protocol_](https://osf.io/g6v3b/) is available on OSF and summarised versions of the questions are outlined in Table 5.
+
+There were eight possible responses to each question: 
+
+- 0 = Yes, consistent with preregistration—no deviation.
+- 1 = No, deviation from preregistration made and declared by the authors and a justification for change is provided.
+- 2 = No, deviation from preregistration made and declared, but no justification for deviation is provided.
+- 3 = No, deviation made and not declared or justified by the authors.
+- U = unable to determine due to lack of detail reported in: [1] the preregistration [scored as U$_P$] (e.g., randomisation procedure not reported in preregistration but used in study), [2] the article [U$_A$] (e.g., randomisation procedure described in preregistration but not in the article), or [3] both [U$_B$] (e.g., randomisation is used but is not specified in either the preregistration or article).
+- NA = Not applicable. 
+ 
+
+## Scoring Risk of Bias in Reporting
+As we scored all articles for adherence according to the 29 RDoFs proposed by Wicherts et al. (2016), we decided (post-preregistration of the present study) to provide further information about the quality of the preregistered study articles by assessing them according to the remaining six RDoFs proposed by Wicherts et al. relating to the risk of bias in reporting. For example, for RDoF R3 ("*Failing to mention, misrepresenting, or misidentifying the study preregistration*") we asked: "*Is the preregistration clearly mentioned and linked/signposted to in the article and easily accessible (e.g., not embargoed)?*". We developed seven questions to cover these RDoF (see Table 6) and appended them to our adherence scoring protocol; all were scored as "1" (yes) or "2" (no). These items were separate from the preregistration scoring RDoF and were only used to assess articles. 
+
+
+## Scoring Procedure
+Two researchers (RH + BK or AS) independently coded each preregistration and associated article[^6] using the scoring protocols outline above, before convening to discuss any inconsistencies and to agree on final scores. Coders documented their scores in two separate "scoring frameworks" (i.e., Microsoft Excel files). All disagreements were resolved by the two coding pairs without the need to consult a third team member. No researcher was involved in coding their own preregistered study and the scores of preregistrations authored by one or more of our research team (N = `r nrow(list_of_authored_regs)`), were checked by an external researcher for accuracy.
+
+[^6]: We use the term "article" to refer to published reports on findings, including journal articles and preprints.
+
+In our preregistration we stated that we would pilot code 10% of our sample. There were 33 preregistrations in our sample after the first OSF search and so we selected four of those with associated articles for pilot coding. After independently coding these, the level of inter-coder reliability achieved for specificity and adherence scores was quantified using Krippendorff’s alpha ($_k$*$\alpha$*). We used the R package “irr” (Gamer & Lemon, 2012) to calculate $_k$*$\alpha$* (analysis script shared on OSF: https://osf.io/67x8k). We achieved an level of inter-coder consistency of $_k$*$\alpha$* = 0.859 (2 raters, 104 items) for specificity scores and $_k$*$\alpha$* = 0.809 (2 raters, 156 items)[^7] for adherence scores. As we achieved our pre-specified minimum level of consistency (i.e., $\ge$ 0.7), we proceeded to score the remainder of the sample. The master scoring framework containing the final, agreed-upon scores used to compute the findings presented here can be accessed on OSF (https://osf.io/b7cyu). The time required to score preregistrations and associated articles was considerable—approximately 1 hour for specificity scoring, 1.5 hours for adherence scoring and 15 minutes for scoring risk of bias in study reporting per researcher.
+
+[^7]: We did not include the question relating to the number of hypotheses in the inter-coder analysis of specificity scores, but we did include the three questions relating to disclosures; hence: (23+3)\*4 = 104 items. For the analysis of adherence scores, we included questions related to disclosures & risk of bias in reporting, making a total of 37 items per article; hence: (29+3+7)\*4=156.
+
+
+## Data Analysis
+All data analyses were performed using R version 4.0.2 [@R-base]. We have shared all of the [_analysis scripts_](https://osf.io/3z2jt/) used for this study on OSF, along with a [_html document_](https://osf.io/wqrn8/) presenting the annotated analysis code (and associated outputs) used to pre-process the data and compute all of the results presented here.
+
+We summarised specificity scores by computing the arithmetic mean, standard deviation (*SD*), and median values for each RDoF and overall (i.e., mean scores on all items were summed and divided by the total number of items [N = 29]). For adherence and risk of bias in reporting scores, we simply tallied the number of each type of response for every question. 
+
+To compare gambling and cross-disciplinary preregistration specificity scores, we employed 30 Wilcoxon-Mann-Whitney (Wilcoxon) tests (29 RDoF specificity scores & 1 overall score). The decision to use non-parametric Wilcoxon tests is consistent with the strategy used by @bakkerEnsuringQualitySpecificity2020 and did not require data to be normally distributed (scores were right skewed; see Figure 2). As NA scores were common, particularly for some items (i.e., RDoFs D1, C1, C2, A2, A8, A9, & A11; see Table 3), we used the same method of dealing with missing values employed by Bakker and colleagues. That is, we used a two-way imputation procedure based on corresponding row and column means. This is performed using the following calculation: *i* + *j* - OM for missing observation (*i*, *j*), where *i* = the mean for the item (e.g., RDoF 1), *j* = the mean score for the preregistration across items, and OM = the mean for all observed items [see @bernaardsInfluenceImputationEM2000].
+
+To minimise the false discovery rate (FDR), we used the Benjamini-Hochberg correction technique [@benjaminiControllingFalseDiscovery1995]. This process involved multiplying all 30 *p*-values returned from our Wilcoxon tests by their rank after ordering them from largest to smallest (e.g., if our fifth largest *p*-value was 0.006 this would become: 0.006\*5 = 0.03). In our preregistration, we stated that we would compare all original *p*-values to their corresponding Benjamini-Hochberg “critical value”—calculated as: (*i*/*m*)Q, where *i* = the rank of the *p*-value (ordered from smallest to largest), *m* = the total number of tests undertaken, & Q = the FDR we select (i.e., 0.05). However, instead we multiplied *p*-values by their rank to produce "corrected *p*-values" & make for easier interpretations of our findings in our summary table (Table 4). 
+
+To determine the magnitude of differences in specificity scores between the samples we calculated Cliff’s Delta (D) effect sizes [@cliffDominanceStatisticsOrdinal1993]. When used as an effect size, D represents the the extent to which two distributions of ordinal values overlap [@romanoExploringMethodsEvaluating2006]. D values range between -1 (all scores in Group 2 > all scores in Group 1) and 1 (all scores in Group 2 < all scores in Group 1), with 0 representing total overlap between samples. Romano and colleagues have compared D values to benchmark values for effect sizes when using Cohen’s *d* (Cohen, 1988), finding a *d* of 0.2 (small effect) corresponds to a D of approximately 0.147, a *d* of 0.5  (medium effect) corresponds to a D of approximately 0.33, and a *d* of 0.8 (large effect) corresponds to a D of approximately 0.474.
+
+## Deviations From Our Preregistration
+We made a small number of deviations from our preregistered plan to best address the aims of the present study. We recorded all deviations and our reasoning for each in Transparent Changes Documents (hereafter “changes documents”) that were uploaded to OSF. 
+
+All major deviations are also reported here. First, as described in our [_changes document 1_](https://osf.io/6fk87/), we decided to score specificity by providing a response for each of the 23 questions in Bakker et al.’s (2020) protocol and then later use these question responses to impute a score for each of the 29 RDoFs. This enabled us to provide a more detailed overview of preregistration specificity because of the dependencies present when scoring according to RDoFs. For example, RDoF A14 is "*Choosing the estimation method, software package, and computation of SEs [standard errors]*" and—when using Bakker et al.’s original protocol—a single specificity score is assigned to this RDoF based on two questions with unique answers: 21a and 21b (see Table 2). Thus, we prevented the loss of granular information provided by paired questions like 21a and 21b. The outcomes for each question (as opposed to RDoF) are shared on OSF (https://osf.io/b7cyu) .
+
+
+ <!-- Table 3 - Summary scores -->
+```{r message=FALSE, warning=FALSE, include = FALSE}
+# Develop a table that presents the summary scores above our sample and Bakker et al.'s preregistrations. NON IMPUTED DATA USED.
+
+# We have already summarised all the data from our sample so let's start with Bakker et al.:
+Bakker.data # Check dataset
+ncol(Bakker.data) # How many columns are there? (useful for subsetting below)
+
+# Creates summary values for each specificity score:
+summary_figures_Bakker.data <- Bakker.data %>%
+  filter(Preregistration_group == 1) %>% # Select the Target group
+  summarise_at(vars(7:35), list(mean = mean,
+                                   sd = sd,
+                                   median = median), na.rm = TRUE) %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("key")
+
+# The above function spreads the values out in a way that is difficult to read and table. Let's isolate all of the values for each summary figure (mean, median etc.) and then join these together to create one readable table:
+
+Mean3 <- summary_figures_Bakker.data[1:29,] %>%
+  select(2)
+SD3 <- summary_figures_Bakker.data[30:58,]  %>%
+    select(2)
+Median3<- summary_figures_Bakker.data[59:87,] %>%
+    select(2)
+
+# Create a summary label column for our table:
+RDoF_labels <- c("Hypothesis", 
+                 "Direction of hypothesis",
+                 "Multiple manipulated IVs",
+                 "Additional IVs",
+                 "Multiple DV measures", 
+                 "Additional constructs",
+                 "Additional exclusion variables", 
+                 "Power analysis",
+                 "Sampling plan",
+                 "Random assignment",
+                 "Blinding", 
+                 "Data handling/collection",
+                 "Stopping rule",
+                 "Missing data", 
+                 "Data pre-processing",
+                 "Statistical assumptions",
+                 "Outliers", 
+                 "Selected DV measured",
+                 "DV scoring", 
+                 "Primary outcome selection",
+                 "IV selection",
+                 "Operationalising manipulated IVs",
+                 "Inclusion of additonal IVs", 
+                 "Operationalising non-manipulated IVs", 
+                 "Eligbility criteria", 
+                 "Statisical model selection", 
+                 "Method and package", 
+                 "Inference criteria", 
+                 "HARKing") # Don't include "&"s as this won't work in Latex
+
+RDoF_labels_summary <- c(" T1: Hypothesis", 
+                 " T2: Direction of hypothesis",
+                 " D1: Multiple manipulated IVs",
+                 " D2: Additional IVs",
+                 " D3: Multiple DV measures", 
+                 " D4: Additional constructs",
+                 " D5: Adding exclusion variables", 
+                 " D6: Power analysis",
+                 " D7: Sampling plan",
+                 " C1: Random assignment",
+                 " C2: Blinding", 
+                 " C3: Data handling/collection",
+                 " C4: Stopping rule",
+                 " A1: Missing data", 
+                 " A2: Data pre-processing",
+                 " A3: Statistical assumptions",
+                 " A4: Outliers", 
+                 " A5: DV measure selection",
+                 " A6: DV scoring", 
+                 " A7: Primary outcome selection",
+                 " A8: IV selection",
+                 " A9: Defining manipulated IVs",
+                 "A10: Adding additional IVs", 
+                 "A11: Defining non-manipulated IVs", 
+                 "A12: Eligbility criteria", 
+                 "A13: Statisical model selection", 
+                 "A14: Method and package", 
+                 "A15: Inference criteria", 
+                 "R6: HARKing") # Don't include "&"s as this won't work in Latex
+
+# Calculate the number of NA responses per question to also add to our table:
+Bakker.data.group1only<- Bakker.data %>%
+  filter(Preregistration_group == 1)
+
+NAcount3 <-sapply(Bakker.data.group1only[7:35], function(y) sum(length(which(is.na(y)))))
+
+# Now join the two summary datasets together:
+table_3_data<- RDoF_labels_summary %>% bind_cols(Mean2, SD2, Median2, NAcount2) %>% # add our data
+  as.data.frame() %>%
+   transmute(Item = ...1,
+             Mean = V1...2,
+             SD = V1...3,
+             Median = V1...4,
+             "NA (N)" = ...5) %>%
+  bind_cols(Mean3, SD3, Median3, NAcount3) %>% # add data from Bakker et al.
+            dplyr::rename( # using the package name first for this function seems to avoid it being overridden by something else and not working after using it a few times
+             Mean2 = V1...6,
+             SD2 = V1...7,
+             Median2 = V1...8,
+             "NA2 (N)" = ...9)
+
+linebreak("a\nb") # Need to Remove all code relating to line breaks for HTML version
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Now create table:
+table_3_data %>%
+mutate_all(linebreak) %>%
+kbl( # For HTML version, remove code above and insert dataset here
+    digits = 2,
+     booktabs = T,
+     linesep = '\\addlinespace',
+    align = c("l","c","c","c","c","c","c","c","c"),
+    caption = "Preregistration specificity: Summary of specificity scores for gambling \\& cross-disciplinary preregistrations",
+    col.names = linebreak(c("Researcher Degrees\nof Freedom (RDoF)",
+                  "Mean",
+                  "$SD$",
+                  "Median",
+                  "NA\n(n)",
+                  "Mean",
+                  "$SD$",
+                  "Median",
+                  "NA\n(n)")),
+     escape = F
+   ) %>%
+  kable_styling(font_size = 7,
+  latex_options = "striped") %>%
+    # kable_styling(font_size = 7,
+    #             latex_options = c("striped", "HOLD_position")) %>% # Hold position instruction keeps the table where we want it when using "man" output style (otherwise it puts it at the end of the doc)
+   # kable_classic(full_width = F, html_font = "Garamond") %>% # If wanting to produce a nice HTML image of this table then add this in and remove the styling chunk of code above.
+    row_spec(0, align = "c") %>% # Align the header row (may need to remove this for the html image as it doesn’t appear to render well in the plot viewer)
+  # column_spec(1, width = "0.5cm") %>%
+  # column_spec(2, width = "3.5cm") %>%
+  pack_rows("Hypotheses", 1, 2) %>%
+  pack_rows("Study design", 3, 9) %>%
+  pack_rows("Data collection", 10, 13) %>%
+  pack_rows("Analysis", 14, 28) %>%
+  pack_rows("Reporting hypotheses", 29, 29) %>%
+add_header_above(c(" " = 1, "Gambling preregistrations,\nN = 53" = 4, "Cross-disciplinary pre-\nregistrations, N = 52" = 4)) %>%
+  footnote(general = c(
+    "Specificity scores range between 0 & 3 (higher scores indicating greater specificity). See subsection `Scor-",
+    "ing preregistration specificity' for more details on the scoring protocol. All figures reported here were", 
+    "calculated using non-imputed specificity scores. Frequency counts for all RDoF item scores can be found", 
+    "in our analysis process document: https://osf.io/wqrn8"),
+  footnote_as_chunk = F)
+
+```
+
+Second, in our preregistration we stated that we would perform a maximum of two search and selection processes and stop sampling after the second, regardless of whether we had identified 53 preregistrations (our pre-specified target). However, after the second search we had identified 49 relevant preregistrations (see Figure 1) and, as we were still coding these several months later (thus sufficient time had lapsed to ensure more gambling studies had been preregistered), we decided to undertake a third search to try and reach our desired sample size (see [_changes document 2_](https://osf.io/pzx6t/)).
+
+Third, and as stated in our [_changes document 3_](https://osf.io/ap9xf/), we planned to calculate summary descriptive values (i.e., arithmetic mean & median) for adherence scores but we agreed that the scores 1-3 represented qualitative categories that described whether and how authors deviated from their preregistration and not an ordinal scale from “no deviation” to “major deviation”. Additionally, we added the option to assign “U” (unable to determine) scores (see changes document 1) and these were common, meaning any summary values (e.g., means) would have not accounted for these categorical scores. Finally, we initially hypothesised that gambling registrations would have consistently lower specificity scores than the cross-disciplinary sample and chose to use one-tailed Wilcoxon tests; however, after performing the one-tailed tests as preregistered it became clear that the direction of differences was not consistent and therefore two-tailed tests were warranted to detect all differences between the samples. As such, we have recorded the outcomes from the one-tailed tests and report these on OSF, but report two-tailed test outcomes here (see [_changes document 3_](https://osf.io/ap9xf/)).
+
+# Results
+
+## Preregistration Specificity
+
+### RDoF Specificity Scores
+Table 3 presents a summary of the specificity scores for gambling preregistrations and for the cross-disciplinary sample studied by @bakkerEnsuringQualitySpecificity2020 for comparison. To allow further comparisons between gambling and cross disciplinary registrations, the frequency of specificity scores given to each RDoF for both samples is presented in Figure 2. 
+
+
+<!-- Table 4 — Hypothesis tests -->
+```{r message=FALSE, warning=FALSE}
+# Develop a table that displays the statistical (hypothesis test) comparison between the two samples' specificity scores:
+
+# Create a new summary column, this time including our overall row:
+RDoF_labels_summary2 <- c(" T1: Hypothesis", 
+                 " T2: Direction of hypothesis",
+                 " D1: Multiple manipulated IVs",
+                 " D2: Additional IVs",
+                 " D3: Multiple DV measures", 
+                 " D4: Additional constructs",
+                 " D5: Adding exclusion variables", 
+                 " D6: Power analysis",
+                 " D7: Sampling plan",
+                 " C1: Random assignment",
+                 " C2: Blinding", 
+                 " C3: Data handling/collection",
+                 " C4: Stopping rule",
+                 " A1: Missing data", 
+                 " A2: Data pre-processing",
+                 " A3: Statistical assumptions",
+                 " A4: Outliers", 
+                 " A5: Selected DV measured",
+                 " A6: DV scoring", 
+                 " A7: Primary outcome selection",
+                 " A8: IV selection",
+                 " A9: Defining manipulated IVs",
+                 "A10: Adding additional IVs", 
+                 "A11: Defining non-manipulated IVs", 
+                 "A12: Eligbility criteria", 
+                 "A13: Statisical model selection", 
+                 "A14: Method and package", 
+                 "A15: Inference criteria", 
+                 "R6: HARKing",
+                 "Overall mean score") # Don't include "&"s as this won't work in Latex
+
+visual <- factor(c("","","","","","","","","","","","","","","","","","","","","","","","","","","","","","")) # Create empty column for Effect size visualisation
+
+BHcorrections <- 1:30 # Create a vector of numbers 1 to 30 for the multiple testing correction
+
+test_results_pdftable <- bind_cols(RDoF_labels_summary2, test_results, effect_sizes, visual) %>%
+  select(-RDoF) %>% 
+  dplyr::rename("RDoF_Code" = 1,
+    "Cliffs_D" = 7,
+         "Lower_95_CI" = 8,
+         "Upper_95_CI" = 9) %>%
+  select(-3,-4,-5) %>%  # remove estimate diff in location and CI columns as we're reporting Cliff's D effect sizes instead
+  arrange(desc(p.value)) %>%
+  bind_cols(BHcorrections) %>% # Add vector of numbers 1 to 30
+  mutate("Corrected_p_value" = p.value*BHcorrections) %>%
+  select(-8) %>%
+  dplyr::rename(visual = 7) %>%
+  relocate("Corrected_p_value", .after = p.value) %>%   # Make the order right
+  relocate(visual, .after = Upper_95_CI) %>%   # Make the order right
+  mutate_if(is.numeric, round, 4) %>% # Round values
+  mutate(Lower_95_CI =  sprintf("%0.3f", Lower_95_CI), # Round values
+    Upper_95_CI =  sprintf("%0.3f", Upper_95_CI),
+     Cliffs_D =  sprintf("%0.3f", Cliffs_D),) %>%   
+      mutate(Cliffs_D = as.numeric(Cliffs_D), # Return these values to numeric
+    Lower_95_CI = as.numeric(Lower_95_CI),
+     Upper_95_CI = as.numeric(Upper_95_CI)) %>%
+  unite("95% CIs", Lower_95_CI:Upper_95_CI, sep = ", ", remove = FALSE) 
+ 
+
+test_results_pdftable$RDoF_Code<- factor(test_results_pdftable$RDoF_Code,
+                               c(" T1: Hypothesis", 
+                 " T2: Direction of hypothesis",
+                 " D1: Multiple manipulated IVs",
+                 " D2: Additional IVs",
+                 " D3: Multiple DV measures", 
+                 " D4: Additional constructs",
+                 " D5: Adding exclusion variables", 
+                 " D6: Power analysis",
+                 " D7: Sampling plan",
+                 " C1: Random assignment",
+                 " C2: Blinding", 
+                 " C3: Data handling/collection",
+                 " C4: Stopping rule",
+                 " A1: Missing data", 
+                 " A2: Data pre-processing",
+                 " A3: Statistical assumptions",
+                 " A4: Outliers", 
+                 " A5: Selected DV measured",
+                 " A6: DV scoring", 
+                 " A7: Primary outcome selection",
+                 " A8: IV selection",
+                 " A9: Defining manipulated IVs",
+                 "A10: Adding additional IVs", 
+                 "A11: Defining non-manipulated IVs", 
+                 "A12: Eligbility criteria", 
+                 "A13: Statisical model selection", 
+                 "A14: Method and package", 
+                 "A15: Inference criteria", 
+                 "R6: HARKing",
+                 "Overall mean score")) # Re-order factor levels
+
+test_results_pdftable<- test_results_pdftable[order(test_results_pdftable$RDoF_Code),]
+
+
+rownames(test_results_pdftable) <- c() # Ordering using the above functions adds row names (ranks) that we need to remove for the table below to work well
+
+test_results_pdftable$Corrected_p_value <- sprintf("%.4f", test_results_pdftable$Corrected_p_value) # making this round correctly here avoids errors in the table once the below line of code is used to make sig comparisons bold
+
+test_results_pdftable_usable_pvalues <- test_results_pdftable # later we need to use this data for some figures and the below code converts the correct p values making them not interpretable by code like "filter(Corrected_p_value < 0.05).
+
+test_results_pdftable$Corrected_p_value <- cell_spec(test_results_pdftable$Corrected_p_value, bold = ifelse(test_results_pdftable$Corrected_p_value < 0.05, T, F))
+
+
+# Create table:
+test_results_pdftable %>% 
+  select(-Lower_95_CI,
+         -Upper_95_CI) %>% 
+kbl(
+    digits = 4,
+    align = c("l","c","c","c","c","c"),
+    caption = "Preregistration specificity: Comparisons between gambling \\& cross-disciplinary registrations' specificity scores",
+    col.names = c("RDoF", "W",
+                  # "difference in location",
+                  # "Lower CI",
+                  # "Upper CI",
+                  "$p$ ","Corrected $p$*", "Effect", "95\\% CIs", ""),
+     booktabs = T,
+     escape = F
+   ) %>%
+  kable_styling(font_size = 7,
+                latex_options = "striped") %>%
+    # kable_styling(font_size = 7,
+    #             latex_options = c("striped", "HOLD_position")) %>% # Hold position instruction keeps the table where we want it when using "man" output style (otherwise it puts it at the end of the doc)
+   # kable_classic(full_width = F, html_font = "Garamond") %>% # If wanting to produce a nice HTML image of this table then add this in and remove the styling chunk of code above.
+    row_spec(0, align = "c") %>% # Align the header row (may need to remove this for the html image as it doesn’t appear to render well in the plot viewer)
+    pack_rows("Hypotheses", 1, 2) %>%
+    pack_rows("Study design", 3, 9) %>%
+    pack_rows("Data collection", 10, 13) %>%
+    pack_rows("Analysis", 14, 28) %>%
+    pack_rows("Reporting hypotheses", 29, 29) %>%
+    pack_rows("Overall", 30,30) %>%
+  column_spec(7, image = spec_pointrange(x = test_results_pdftable$Cliffs_D,
+                                         xmin = test_results_pdftable$Lower_95_CI,
+                                         xmax = test_results_pdftable$Upper_95_CI,
+                                         vline = 0)) %>%
+    # column_spec(8, width = "3cm") %>%
+  add_header_above(c(" ", "Wilcoxon test" = 3, "Cliff's D effect size" = 3)) %>%
+  footnote(general = c("*Corrected using Benjamini-Hochberg method (i.e., ranked from largest to smallest & then multiplied by rank); Bold p-", 
+                       "values were statistically significant after the Benjamini-Hochberg correction; CIs = 95% confidence intervals; Plots show", 
+                       "Cliff's Delta (D) & effect sizes 95% CIs (the dotted line = 0). D values can range between -1 (all gambling preregistrat-", 
+                       "ions score higher than all cross-disciplinary ones) to 1 (all cross-disciplinary preregistrations score higher than all gamb-", "ling ones)"),
+  footnote_as_chunk = F)
+
+# D values range between -1 (all scores in Group 2 > all scores in Group 1) and 1 (all scores in Group 2 < all scores in Group 1)
+```
+
+
+#### Confirmatory Analyses
+Outcomes from the Wilcoxon tests comparing the groups’ specificity scores are presented in Table 4. Gambling studies' preregistrations were significantly more likely to include hypotheses that clearly described the variables of interest (RDoF H1: medium effect size) and stated the direction of the hypothesised effect (RDoF H2: medium effect), potentially reducing the risk of HARKing (RDoF R6: small effect). 
+
+In relation to study design, gambling preregistrations contained significantly more specification of sampling plans (D7: large effect) than cross-disciplinary preregistrations and were more likely to explicitly exclude the possibility of studying additional dependent variables other than those preregistered (D4: small effect). Conversely, descriptions of manipulated variables were significantly more specific in cross-disciplinary preregistrations (D1: medium effect).
+
+In relation to data collection procedures, gambling preregistrations were significantly more specific in their descriptions of blinding (C2: very large effect), data handling during collection (C3: small-medium effect), and when data collection will end (i.e., “stopping rules”; C4: large effect). 
+
+Gambling preregistrations were also significantly more specific in their descriptions of four (of 15) RDoFs relating to the analysis process, including data preparation when working with complex datasets requiring pre-processing (A2: very large effect), the process of measuring or scoring of the primary dependent variable (A6: medium effect), excluding the possibility of studying additional dependent variables (A7: small effect), and the process of measuring or scoring non-manipulated independent variables (A11: large effect). Descriptions of how manipulated variables will be used in analyses, however, were significantly more specific in cross-disciplinary preregistrations (A8: medium-large effect).
+
+Overall, the mean specificity score for the gambling sample (mean = `r sprintf("%.2f", round(mean_group_overall_specificity_score %>% filter(Preregistration_group == "Gambling sample") %>% ungroup () %>% select(mean), 2))`, SD = `r sprintf("%.2f", round(mean_group_overall_specificity_score %>% filter(Preregistration_group == "Gambling sample") %>% ungroup () %>% select(sd), 2))`, median = `r sprintf("%.2f", round(mean_group_overall_specificity_score %>% filter(Preregistration_group == "Gambling sample") %>% ungroup () %>% select(median), 2))`) was greater than for the cross-disciplinary sample (mean = `r sprintf("%.2f", round(mean_group_overall_specificity_score %>% filter(Preregistration_group == "Cross-disciplinary sample") %>% ungroup () %>% select(mean), 2))`, SD = `r sprintf("%.2f", round(mean_group_overall_specificity_score %>% filter(Preregistration_group == "Cross-disciplinary sample") %>% ungroup () %>% select(sd), 2))`, median = `r sprintf("%.2f", round(mean_group_overall_specificity_score %>% filter(Preregistration_group == "Cross-disciplinary sample") %>% ungroup () %>% select(median), 2))`; medium-large effect), although this difference was not statistically significant after correcting for multiple testing with the Benjamini-Hochberg procedure.
+
+<!-- Figure 2 -->
+![**Distribution of specificity scores for gambling & cross-disciplinary preregistrations.**
+*Note:* These density plots show the relative distribution of specificity scores given for each RDoF item for both samples of preregistrations (non-imputed scores used). * & # indicate statistically significant difference between samples: * = gambling preregistrations > cross-disciplinary; # = cross-disciplinary > gambling preregistrations (see Table 4 for test outcomes). Note: Scores of 1 were not possible for the following RDoFs: T1, T2, D1, D3, A2, A5, A8, and A9. Scores of 1 and 2 were not possible for the following RDoFs: D2, D4, A7, and A10. Also, while this figure displays the relative distribution of scores for each RDoF rather than exact frequency counts, the number of scores contributing to each density plot varies between the samples due to differences in the number of NA scores (see Table 3). \label{fig2}](Figures/Fig2.pdf)
+
+```{r results = FALSE, echo = FALSE}
+# Let's compute some summary scores here before we add them into below paragraph:
+
+# Mean overall specificity score for OSF template and open ended templates using the OSF template combined: 
+full_open_ended_score<- combineddata %>% 
+  filter(Preregistration_group == 2) %>% # select our sample
+  filter(Preregistration_number != 21) %>% # Remove the one open-ended registration that didn't use the OSF template 
+  filter(Registration.type.format == "Open-Ended Registration" |
+         Registration.type.format == "OSF Preregistration" |
+         Registration.type.format == "Prereg Challenge") %>% 
+  dplyr::rename(mean_score = "Mean score") %>% 
+  summarise(
+    Median = median(mean_score)) %>% 
+  as.matrix()
+
+# Isolate and select the mean specificity score for RH and SG's pre-reg which is a huge outlier:
+RH.SG.prereg<- combineddata %>%
+  filter(Preregistration_number == 33) %>%
+  select(mean_score = "Mean score") %>% 
+  as.matrix()
+
+# Now, how do our preregistrations compare to the rest of the sample?
+
+# Start with the rest of the sample:
+summary.excl.ours<- combineddata %>%
+  filter(Preregistration_group == 2) %>%
+  anti_join(list_of_reg_nos) %>% # Remove our registrations
+  select(mean_score = "Mean score") %>% 
+  summarise(
+    Mean = mean(mean_score),
+    sd = sd(mean_score)
+    ) %>% 
+  as.matrix()
+
+# Now our registrations:
+summary.only.ours <- combineddata %>%
+  filter(Preregistration_group == 2) %>%
+  semi_join(list_of_reg_nos) %>% # Retain our registrations
+  select(mean_score = "Mean score") %>% 
+  summarise(
+    Mean = mean(mean_score),
+    sd = sd(mean_score)
+    ) %>% 
+  as.matrix()
+
+```
+
+#### Exploratory Analyses
+We calculated the mean overall score per gambling study preregistration, grouped them by year of registration, and plotted them in Figure 3A. The mean specificity score of preregistrations increased year on year from 2017 (median = `r sprintf("%.2f", round(year.summary.values %>% filter(Year == "2017") %>% select(median), 2))`), through 2018 (median = `r sprintf("%.2f", round(year.summary.values %>% filter(Year == "2018") %>% select(median), 2))`) and 2019 (median = `r sprintf("%.2f", round(year.summary.values %>% filter(Year == "2019") %>% select(median), 2))`), and then dropped slightly in 2020 (median = `r sprintf("%.2f", round(year.summary.values %>% filter(Year == "2020") %>% select(median), 2))`). 
+
+We also grouped the mean overall score by the template used and plotted this in Figure 3B. Open-ended preregistrations had the highest specificity score (median = `r sprintf("%.2f", round(template.summary.values %>% filter(Template == "Open-Ended Registration") %>% select(median), 2))`), followed by those using the OSF preregistration template (formerly “Prereg Challenge”; median = `r sprintf("%.2f", round(template.summary.values %>% filter(Template == "OSF Preregistration") %>% select(median), 2))`), the template from AsPredicted.org (median = `r sprintf("%.2f", round(template.summary.values %>% filter(Template == "Preregistration Template from AsPredicted.org") %>% select(median), 2))`), and finally the OSF standard pre-data collection template (median = `r sprintf("%.2f", round(template.summary.values %>% filter(Template == "OSF-Standard Pre-Data Collection Registration") %>% select(median), 2))`). However, 10 (91%) Open-ended preregistrations actually used the OSF preregistration template in a Word document format. Combining all preregistrations that used the OSF template in some form results in a median specificity score of `r sprintf("%.2f", round(full_open_ended_score, 2))`. The conspicuous outlier in both panels of Figure 3 (mean score = `r round(RH.SG.prereg,2)`) was a preregistration written by the first and last authors before we conceived of this study and was developed specifically to achieve high scores on the RDoF scoring protocol developed by @bakkerEnsuringQualitySpecificity2020. Overall, the mean specificity score was higher for the `r nrow(list_of_reg_nos)` preregistrations written by one of the present authors (*M* = `r sprintf("%.2f", round(summary.only.ours[1,1], 2))`, *SD* = `r sprintf("%.2f", round(summary.only.ours[1,2], 2))`) compared to the rest of the sample  (*M* = `r sprintf("%.2f", round(summary.excl.ours[1,1], 2))`, *SD* = `r sprintf("%.2f", round(summary.excl.ours[1,2], 2))`).
+
+We performed Spearman's rank-order correlations between the aggregated scores for all RDoF categories (e.g., Data collection, analysis). Specificity scores in every domain were strongly and positively correlated with every other (see Figure 4).
+
+<!-- Figure 3 -->
+![**Gambling preregistration specificity scores over time (A) & for different templates (B).**
+*Note:* Figure 3A shows each preregistration's mean overall specificity score, grouped by the year of registration. Figure 3B shows the same values but grouped by the template used to structure the preregistration. Both use non-imputed, original scores \label{fig3}](Figures/Fig3.pdf)
+
+<!-- Figure 4 -->
+![**Correlation matrix for the relationships between aggregated specificity scores.**
+*Note:* All Spearman's rank-order correlations were significant at the p < 0.05 level. Only Gambling preregistrations were included. \label{fig4}](Figures/Fig4.pdf)
+
+### Number of Hypotheses
+Many hypotheses reported in preregistrations could be interpreted as single predictions or multiple independent but related predictions. For example, one hypothesis was: “*We predict that participants will report a higher likelihood of winning, excitement, and urge to gamble as well as hypothetically purchase more scratch cards when scratch cards are presented with unclaimed prize information compared to when scratch cards are presented without unclaimed prize information (i.e., ticket remaining information and game number conditions)*” which, while reported as a single hypotheses (no. 2 in a list of 4), contains four predictions that could be tested separately. The number of hypotheses therefore varied depending on whether all predictions reported as one hypothesis were assumed to be one hypothesis (*M* = `r round(summary.of.hyp.confusions %>% select(mean_min_hyp), 2)`, *SD* = `r round(summary.of.hyp.confusions %>% select(SD_min_hyp), 2)`, min = `r summary.of.hyp.confusions %>% select(min_min_hyp)`, max = `r summary.of.hyp.confusions %>% select(max_min_hyp)`) or multiple independent hypotheses (*M* = `r round(summary.of.hyp.confusions %>% select(mean_max_hyp), 2)`, *SD* = `r round(summary.of.hyp.confusions %>% select(SD_max_hyp), 2)`, min = `r summary.of.hyp.confusions %>% select(min_max_hyp)`, max = `r summary.of.hyp.confusions %>% select(max_max_hyp)`). `r Words(no.hyp.confusions)` (`r round(no.hyp.confusions/53*100,2)`%) articles presented their hypotheses in this way. 
+
+<!--pre-reg where the hypothesis comes from: https://osf.io/2xqgw -->
+
+### Reporting of Disclosures
+
+```{r,, echo = FALSE}
+# Need to compute a value for the below paragraph here as it needs to be presented as words rather than digits. We will use the "english" package and "Words" function to to do this, but it doesn't work well if you try to run it on a function.
+
+no.reporting.funding<- disclosure.specificity.scores[2,3] %>% as.matrix()
+
+```
+
+`r Words(no.reporting.funding)` (`r sprintf("%.1f", round(disclosure.specificity.scores[2,4], 1))`%) preregistrations included a funding disclosure, `r disclosure.specificity.scores[4,3]` (`r sprintf("%.1f", round(disclosure.specificity.scores[4,4], 1))`%) reported a conflicts of interest statement, and `r disclosure.specificity.scores[6,3]` (`r sprintf("%.1f", round(disclosure.specificity.scores[6,4], 1))`%) reported whether there were any restrictions on publishing. However, almost every preregistration that included a disclosure was authored by one or more of the present team. After removing our preregistrations, only `r disclosure.specificity.scores.2[2,3]` (`r sprintf("%.1f", round(disclosure.specificity.scores.2[2,4], 1))`%) of the remaining 36 included a funding disclosure, and none reported conflicts of interest statements or restrictions on publishing. 
+
+## Adherence to Preregistrations
+We found 17 articles associated with 20 preregistrations. Scoring was done at the level of the preregistered study and thus scores for 20 articles are presented. We found `r total_undeclared_deviations` (`r (total_undeclared_deviations/20)*100`%) articles included at least one undeclared deviation (i.e., a score of 3). The number of undeclared deviations per study ranged from `r summary_undeclared_deviations %>% select(min)` to `r summary_undeclared_deviations %>% select(max)` (*M* = `r summary_undeclared_deviations %>% select(mean)`, *SD* = `r round(summary_undeclared_deviations %>% select(sd), 2)`). The number of articles containing at least one undeclared deviation was `r undeclared_deviations_over_time_summary %>% filter(Year == 2017) %>% select(No.deviating.studies) ` (`r sprintf("%.1f", round(undeclared_deviations_over_time_summary %>% filter(Year == 2017)  %>% select(Percentage), 1))`%)  in 2017, `r undeclared_deviations_over_time_summary %>% filter(Year == 2018) %>% select(No.deviating.studies)` (`r sprintf("%.1f", round(undeclared_deviations_over_time_summary %>% filter(Year == 2018) %>% select(Percentage), 1))`%) in 2018, `r undeclared_deviations_over_time_summary %>% filter(Year == 2019) %>% select(No.deviating.studies)` (`r sprintf("%.1f", round( undeclared_deviations_over_time_summary %>% filter(Year == 2019) %>% select(Percentage), 1))`%)  in 2019, and `r undeclared_deviations_over_time_summary %>% filter(Year == 2020) %>% select(No.deviating.studies)` (`r sprintf("%.1f", round(undeclared_deviations_over_time_summary%>% filter(Year == 2020) %>% select(Percentage),1 ))`%) in 2020. Only `r total_declared_deviations` articles declared a deviation from the preregistration and provided a rationale for the change (i.e., a score of 1; the range of this score [per article] was `r summary_declared_deviations %>% select(min)`-`r summary_declared_deviations %>% select(max)`, *M* = `r sprintf("%.2f", round(summary_declared_deviations %>% select(mean), 2))`, *SD* = `r round(summary_declared_deviations %>% select(sd),2)`).
+
+Figure 5 presents the proportion of each adherence scores as given across all questions and articles. A score of 0 was most common, indicating no deviation from the preregistration. The different "U" scores were also common, indicating that it was frequently difficult to determine whether authors had deviated from their preregistrations. Combined, U scores made up `r sprintf("%.1f", round(dev_score_counts %>% filter(value == "U(A)" |value == "U(B)" |value == "U(P)") %>% summarise(sum(Percentage)), 1))`% of the total responses given, with most (`r round(dev_score_counts %>% filter(value == "U(B)" |value == "U(P)") %>% summarise(sum(Percentage)), 1)`%) made up by U$_P$ (unable to determine due to a lack of information in preregistration) and U$_B$ (unable to determine due to a lack of information in both the preregistration and article) scores. A score of 2 was not awarded to any article, indicating that all reported deviations were accompanied with rationale.
+
+
+<!-- Figure 5 - Percentage each adherence score -->
+```{r, echo = FALSE, include = FALSE}
+# Plot the overall distribution of each adherence score:
+
+# We have already computed a small dataset contains the relevant data:
+#                    dev_score_counts
+# However, this dataset doesn't contain values for the score of 2 as no papers were given this score, but we still need to visually represent this in our graph so let's create a dataset to add to ours:
+value <-  2
+Sum <-  0
+Percentage <-  0.00
+
+value2<- bind_cols(value, Sum, Percentage) %>%
+  select(value = ...1,
+         Sum = ...2,
+         Percentage = ...3) %>%
+  mutate(value = as.character(value)) 
+
+dev_score_counts[is.na(dev_score_counts)] <- "NA" # Replace NA values with an "NA" character so that the plot below will colour the NA bar
+
+# Join the two datasets:
+adherence_scores<- bind_rows(value2, dev_score_counts) %>%
+  mutate(round(Percentage, 2)) %>%
+  select(-Percentage) %>%
+  dplyr::rename(Percentage = `round(Percentage, 2)`)
+  
+# adherence_scores %>% summarise(sum(Percentage)) # Check percentage columns totals 100
+
+# Reorder the levels:
+adherence_scores$value<- factor(adherence_scores$value,
+                                c("0",
+                                  "1",
+                                  "2",
+                                  "3",
+                                  "U(P)",
+                                  "U(A)",
+                                  "U(B)",
+                                  "NA"))
+
+adherence_scores<- adherence_scores[order(adherence_scores$value),]
+
+# Note on the x-axis labels for this plot: okay, so a reviewer asked us to replace the labels of the first three bars (which were 0, 1, 2, & 3) with some kind of semantic label. This seems fine in principle, but because 3 of the labels are expressions due to requiring the use of subscripts, it was a nightmare trying to find a way to present the longer semantic labels alongside these expressions. If I use the str_wrap() function to nicely presented the longer labels, it doesn't render the expressions properly. if we manually adjust the label positioning suing vjust or change the angle, it also does this to the expressions and it makes them look very messy (puts them at the very bottom of the semantic labels, like an inch below the x-axis). so, I played around with this for quite some time and came to the conclusion that the best way to do this is just to remove the first three labels and then manually place them in with the annotate() function.
+
+# devtools::install_github("nicolash2/ggbrace")
+
+
+# Plot outcomes:
+Fig5 <-  ggplot(adherence_scores, aes(x=value, y=Percentage, fill=value)) + 
+  geom_bar(stat = "identity", position = position_dodge2(width = 2), alpha = 1, color="black")+
+  geom_text(aes(label=Percentage), position=position_dodge(width=0.9), vjust=-1, family = "Cormorant Garamond",size = 2.5, color="black")+
+  theme(axis.text.y = element_text(color = "black",
+                                 size = 8.5, 
+                                 family = "Cormorant Garamond"))+
+  theme(axis.text.x = element_text(color = "black",
+                                 size = 8.5, 
+                                 family = "Cormorant Garamond", 
+                                 angle = 0, 
+                                 vjust = 0))+
+  theme(axis.title.x = element_text(color="black", 
+                                    size=11, 
+                                    vjust= -1,
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", 
+                                    size=11, 
+                                    vjust = 3,
+                                    family = "Cormorant Garamond"))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  scale_x_discrete(name = "Adherence score", labels = c("0",
+                                                        "1",
+                                                        "2",
+                                                        "3",
+                                  expression("U"[P]),
+                                  expression("U"[A]),
+                                  expression("U"[B]),
+                                  "NA")
+                     ) +
+  annotate("text", x = 1, y = 41.1, family = "Cormorant Garamond", size = 2.5, color = "gray20",
+    label = "(No deviation)") +
+   annotate("text", x = 2, y = 8.2, family = "Cormorant Garamond", size = 2.5, color = "gray20",
+    label = "(Deviation, 
+declared & 
+justified)") +
+  annotate("text", x = 3, y = 5.4, family = "Cormorant Garamond", size = 2.5, color = "gray20",
+    label = "(Deviation, 
+declared not 
+justified)") +  
+  annotate("text", x = 4, y = 10.9, family = "Cormorant Garamond", size = 2.5, color = "gray20",
+    label = "(Deviation, 
+not declared)") +
+    annotate("text", x = 6, y = 27.2, family = "Cormorant Garamond", size = 2.5, color = "gray20",
+    label = "Unable to determine due to lack of detail 
+in the preregistration (P), article (A), 
+or both (B)") +
+   ggbrace::geom_brace(aes(c(4.6,7.4), c(20, 24)), inherit.data=F) +
+  # theme(axis.title.x = element_blank()) +
+  scale_y_continuous(name = "Percentage of total responses", breaks = c(0, 5, 10, 15, 20, 25, 30, 35)) +
+  theme(plot.margin = unit(c(0,0,1,0.5), "cm"))+
+  scale_fill_viridis_d(begin = 0, end = 0.7) +
+  theme(legend.position = "none")
+
+# Fig5
+
+ggsave("Figures/Fig5.pdf", # Save as image
+       width = 145,
+       height = 95,
+       units = c("mm"))
+
+```
+
+<!-- Figure 5 -->
+![**Distribution of adherence scores.**
+*Note:* The proportion of each type of adherence score for the entire set of responses across all questions & articles. There were 520 total responses (26 questions * 20 articles). Scoring: 0 = Yes, consistent with preregistration—no deviation; 1 = No, deviation from preregistration made and declared by the authors and a justification for change is provided; 2 = No, deviation from preregistration made and declared, but no justification for deviation is provided; 3 = No, deviation made and not declared or justified by the authors; U = unable to determine due to lack of detail reported in the preregistration [U$_P$], the article [U$_A$], or both; [U$_B$]; NA = Not applicable.\label{fig5}](Figures/Fig5.pdf)
+
+Table 5 presents the distribution of adherence scores for each question. Undeclared deviations most commonly related to the hypotheses tested, the variables included in tests, and the statistical analyses selected to test hypotheses. U$_P$ scores, which indicate that there was poor specificity of an item in the preregistration despite being relevant to the study, were common in relation to the operationalisation of independent variables, the estimation techniques used to estimate the statistical model(s), the statistical software used to conduct analyses, inference criteria, research funding, and competing interests. U$_B$ scores, which indicate a lack of specificity in both the preregistration and article despite being relevant to the study, were common in relation to the procedures used to randomly allocate participants to conditions, coding and handling data during data collection (e.g., dealing with mistakes made by participants or equipment), dealing with missing data, handling outliers, testing statistical assumptions, the software used to perform analyses, and possible constraints on publishing findings.
+
+
+<!-- Table 5 – Adherence scores -->
+```{r message=FALSE, warning=FALSE}
+
+# summary_row_label <- tibble("0")
+# , ("(0.00)") %>% t() %>%  
+#   as.data.frame()
+
+summary_row_label <- tibble(
+  `Summation` = "0", 
+  `Percentage` = "0.00") %>%  
+  # as.data.frame() %>%  
+  mutate(Summation = as.double(Summation)) %>%  
+  mutate(Percentage = as.double(Percentage))
+
+  # %>% 
+  # unite("Summation (% of total responses)", Summation, Percentage, sep = ", ") 
+# 
+# dev_score_counts_united <-  dev_score_counts %>% 
+#     mutate_if(is.numeric, round, 2)
+#   
+# Now put brackets around the Percentage values:
+# dev_score_counts_united[, 3] <- paste0("(", format(unlist(dev_score_counts_united[, 3])),")")
+
+# As the percentage values are not consistently the same length there is some white space inside the brackets. Remove:
+# dev_score_counts_united$Percentage<- gsub(" ", "", dev_score_counts_united$Percentage, fixed = TRUE)
+
+
+summary_row <- dev_score_counts %>% select(Summation, Percentage) %>% 
+  # unite("Sum (% of total responses)", Sum, Percentage, sep = ",") %>%
+    bind_rows(summary_row_label) %>%
+  select(Summation) %>% # if not adding percentage to cells 
+  t() %>% 
+  as.data.frame() %>%
+  rownames_to_column("key") %>%
+  dplyr::rename("zero" = 2,
+         "one" = 3,
+         "three" = 4,
+         "UA" = 5,
+         "UB" =6,
+         "UP" = 7,
+         # "key" = 9,
+         "NAT" = 8,
+         "two" = 9) %>%
+  as_tibble()
+
+
+dev_score_counts_byitem_pdftable <- dev_score_counts_byitem %>% dplyr::rename("zero" = "0",
+                                                              "one" = "1",
+                                                              "two" = "2",
+                                                              "three" = "3",
+                                                              "UP" = "U(P)",
+                                                              "UA" = "U(A)",
+                                                              "UB" = "U(B)",
+                                                              "NAT" = "NA") %>%
+  relocate(UP, .after = three) %>%  # Make the order right
+  # mutate(zero = as.character(zero)) %>%  # IF adding percentage in cells: Make all of these columns character format so that we can join them with a bottom summary row which contains characters
+  # mutate(one = as.character(one)) %>% 
+  # mutate(two = as.character(two)) %>% 
+  # mutate(three = as.character(three)) %>% 
+  # mutate(UP = as.character(UP)) %>% 
+  # mutate(UB = as.character(UB)) %>% 
+  # mutate(UA = as.character(UA)) %>% 
+  #   mutate(NAT = as.character(NAT)) %>% 
+  bind_rows(summary_row)
+
+UP <- "U$_P$"
+UP.1 <- "U\\$_P$ = Unable to determine to due lack of specificity in preregistration"
+UA <- "U$_A$" 
+UA.1 <- "U$_A$ = Unable to determine to due lack of specificity in article."
+UB <- "U$_B$"
+UB.1 <- "U$_B$ = Unable to determine to due lack of specificity in both the preregistration and article."
+
+dev_score_counts_byitem_pdftable$three <- cell_spec(dev_score_counts_byitem_pdftable$three, color = ifelse(dev_score_counts_byitem_pdftable$three > 0, "red", "black"))
+
+kbl(dev_score_counts_byitem_pdftable,
+    col.names = c("Abbreviated question", "0", "1", "2", "3", UP,UA, UB, "NA"),
+    escape = F,
+    caption = "Gambling researchers' adherence to their preregistrations: Frequency of adherence scores by question",
+    booktabs = T,
+    linesep = '') %>%
+add_header_above(c(" ", "Adherence scores (n)" = 8)) %>%
+  kable_styling(font_size = 7,
+                latex_options = "striped") %>%
+    # kable_styling(font_size = 7,
+    #             latex_options = c("striped", "HOLD_position")) %>% # Hold position instruction keeps the table where we want it when using "man" output style (otherwise it puts it at the end of the doc)
+
+  column_spec(1, width = "8.5cm") %>%
+   pack_rows("Hypotheses", 1, 2) %>%
+    pack_rows("Study design", 3, 6) %>%
+    pack_rows("Data collection", 7, 11) %>%
+    pack_rows("Analysis", 12, 23) %>%
+    pack_rows("Disclosures", 24, 26) %>%
+    pack_rows("Overall", 27, 27) %>%
+  footnote(general = c(
+    "We answered all questions in relation to the confirmatory, hypothesis tests. Undeclared deviations (i.e., scores of 3) are",
+    "coloured red for ease of detection. While we developed 29 questions for each of the 29 RDoFs (and 3 related to disclosu- ", 
+    "res), due to dependencies in the RDoFs the same question was asked for 6 pairs of items (e.g., RDoFs D4 and C4) and ", "so we removed all responses to duplicated questions before performing calculations to prevent weighting some questions", "more than others.", UP.1, UA.1, UB.1),
+  footnote_as_chunk = F,
+  escape = F)
+```
+
+## Risk of Bias in Reporting
+
+```{r, echo = FALSE}
+# Need to compute some values for the below paragraph here as they are less than 10 and therefore need to be presented as words rather than digits. We will use the "english" package and "words" function to to do this, but it doesn't work well if you try to run it on a function.
+
+no.articles.statcheck <- statcheck_outcomes %>% summarise(number = n_distinct(Source))# No. of articles recognised by statcheck
+
+no.reporting.errors <- Normal_errors_statcheck[2] #No. statistical reporting errors
+
+no.reporting.decision.errors <- Decision_errors_statcheck[2] #No. statistical decision errors
+
+```
+
+The outcomes from scoring the risk of bias in study reporting are presented in Table 6. We operationalised RDoF R5 (misreporting results and p-values) as failing the online tool ‘statcheck’ (http://statcheck.io), which uses the test statistic and degrees of freedom from reported outcomes to recalculate *p*-values and highlight any discrepancies between reported and recalculated values. Statcheck was able to identify all of the components required to recompute `r nrow(statcheck_outcomes)` *p*-values in `r words(no.articles.statcheck$n)` articles (the tool may have been unable to find the information required to compute p-values in some articles for several reasons, including because none were reported, results were not reported in APA style, or difficulty reading PDF files). We found `r words(no.reporting.errors)` (`r sprintf("%.1f", round(as.data.frame(Normal_errors_statcheck) %>% filter(Var1 == TRUE) %>% mutate(percent = Freq/nrow(statcheck_outcomes)*100) %>% select(percent), 1))`%) statistical reporting errors, one `r words(no.reporting.decision.errors)` (`r sprintf("%.2f", round(as.data.frame(Decision_errors_statcheck) %>% filter(Var1 == TRUE) %>% mutate(percent = Freq/nrow(statcheck_outcomes)*100) %>% select(percent), 2))`%) of which was a decision error (i.e., a *p*-value misreported in a way that may affect whether it is interpreted as statistically significant [it crosses the 0.05 threshold]), spread across two articles (which reported four preregistered studies between them). However, we decided to manually inspect all errors and found that one non-decision error and the one decision error were mistakes made by statcheck misidentifying outcome values. After removing these two incorrectly identified reporting errors, the remaining four errors were still reported in two articles.
+
+```{r warning=TRUE}
+# Table 6
+RDoFcode <- c("R1", "", "R2", "R3", "R4", "R5", "R6")
+
+RDoF <- c("Failing to assure reproducibility (verifying the data collection and data analysis)","","Failing to enable replication (re-running of the study)","Failing to mention, misrepresenting, or misidentifying the study preregistration","Failing to report so-called “failed studies” that were originally deemed relevant to the research question","Misreporting results and p-values","Presenting exploratory analyses as confirmatory (HARKing)")
+
+study_reporting_quality_full<- RDoFcode %>%
+  bind_cols(RDoF, study_reporting_quality) %>%
+  dplyr::rename("Code" = 1,
+         "Researcher Degrees of Freedom" = 2)
+
+kable(study_reporting_quality_full,
+    caption = "Summary of risk of bias in reporting scores",
+    align = c("l","l","l","c","c","c"),
+    # format = 'html'
+    escape = F,
+    booktabs = T,
+    linesep = ''
+    ) %>%
+ kable_styling(font_size = 7,
+                latex_options = "striped") %>%
+      # kable_styling(font_size = 7,
+      #           latex_options = c("striped", "HOLD_position")) %>% # Hold position instruction keeps the table where we want it when using "man" output style (otherwise it puts it at the end of the doc)
+    add_header_above(c(" " = 3, "Scores (N)" = 3)) %>%
+    column_spec(2, width = "5cm") %>%
+    column_spec(3, width = "5.5cm") %>%
+  footnote(general = c("Scores were assigned for each preregistered study reported as opposed to each article, other than for RDoF 5 which had", "to be scored at the article level and therefore scores for two of the 17 articles are represented five times in the frequency", "counts presented as these reported results from five of the preregistrations in our sample."))
+
+```
+
+
+# Discussion
+The aim of this study was to better understand modern preregistration practices and how these can be improved to maximise their potential scientific benefits. We assessed the degree to which gambling studies researchers sufficiently specified all aspects of their studies in preregistrations (N = 53), the extent to which they adhered to their plans, and the risk of bias in the reporting of preregistered studies in the field. We also compared the results for our sample with the results from a similar study that analysed a cross-disciplinary sample of 52 preregistrations (Baker et al., 2020). In the following subsections we discuss the results from each of these assessments, the implications and limitations of our findings, and recommendations for improving preregistration practices.
+
+## Preregistration Specificity
+Similar to @bakkerEnsuringQualitySpecificity2020, we found that gambling researchers’ level of specificity was low for many RDoFs, indicating that RDoF in these particular areas was not restricted by preregistrations. Mean specificity scores were less than 1 (which represents the minimal possible specificity, and 0 represents ‘not specified’) for `r table_3_data %>% filter(Mean <1) %>% nrow()` RDoFs, including descriptions of: the independent variables and how they will be measured (D1 & A8); all variables (e.g., covariates, moderators) included in analyses (D2 & A10); the primary dependent variable(s) (D4 & A7), power analyses (D6), participant randomisation (C1); blinding procedures (C2); coding and handling data during collection (C3); handling missing data (A1); dealing with statistical assumptions testing (A3); handling outliers (A4); the estimation method software package and computation of standard errors (A14); and the hypotheses, sufficiently so as to prevent HARKing (R6). These findings suggest the intended benefits of preregistration—such as restricting and enabling an evaluation of test severity—are not fully achieved by current levels of reporting within preregistrations. One area where specificity levels were relatively high (mean >2) was in the description of study hypotheses. While some hypotheses were vaguely specified (see Number of hypotheses subsection of results), most researchers presented hypotheses that enabled us to discern the key variables under study as well as the direction of the predicted effect(s). This is positive given the centrality of hypotheses to preregistrations, and represents an area of good practice.
+
+Despite generally low specificity levels and contrary to our hypothesis, 12 RDoF specificity scores from our gambling studies sample were significantly higher than those from the cross-disciplinary sample in Bakker et al (2020). There are a number of possible reasons for this. First, all studies in the cross-disciplinary sample were registered in 2016 and mean specificity scores appear to have improved over time (`r sprintf("%.1f", round(year_of_registration %>% filter(Year == 2020) %>% ungroup() %>% select(Percentage), 1))`% of articles in our sample were published in 2020, `r sprintf("%.1f", round(year_of_registration %>% filter(Year == 2019) %>% ungroup() %>% select(Percentage), 1))`% in 2019, `r sprintf("%.1f", round(year_of_registration %>% filter(Year == 2018) %>% ungroup() %>% select(Percentage), 1))`% in 2018, & `r sprintf("%.1f", round(year_of_registration %>% filter(Year == 2017) %>% ungroup() %>% select(Percentage), 1))`% in 2017). Second, there may have been differences in scoring between our study and that of Bakker and colleagues. As stated in the *Scoring preregistration specificity* subsection, we developed multiple decision rules to guide our scoring and these often focused on how we could award *more* scores in circumstances where the proposed methods were not aligned with the scoring system so as not to unfairly disadvantage these preregistrations. For example, question two in the scoring protocol asks, "*Is the direction of the hypothesis specified?*" and in order to obtain a high score of 3, a preregistration must also state the sidedness of the statistical test of the hypothesis; however, some of the preregistrations used Chi-Squared tests and/or analysis of variance and the sidedness of these tests cannot be specified. As such, we awarded a score of 3 in these cases so long as the direction of all predicted differences were clearly specified. Third, `r nrow(list_of_authored_regs)` (`r sprintf("%.1f", round(nrow(list_of_authored_regs)/53*100, 1))` %) of the gambling preregistrations were authored by one or more of the present study’s team, all of whom are dedicated to improving the transparency of their work through preregistration. The mean overall specificity score for registrations authored by one of the present team was considerably higher than the remaining sample of registrations (`r sprintf("%.2f", round(author_group_summary_scores %>% filter(author_group == "ours") %>% select(group_mean), 2))` & `r sprintf("%.2f", round(author_group_summary_scores %>% filter(author_group == "not ours") %>% select(group_mean), 2))`, respectively). 
+
+## Adherence to Preregistrations
+Researchers may deviate from their preregistration for a number of reasons—due to requests from referees or editors during the peer review process; after finding a more appropriate statistical test of their hypothesis or unexpected, but logical, reasons to exclude particular participants; or more concerningly, in order to increase the chance of observing statistically significant findings and/or to inflate effect sizes. Thus, deviations can be positive, resulting in more informative and/or scientifically rigorous outcomes, or negative, resulting in misleading or inaccurate findings. Either way, it is essential that researchers transparently report any deviations so that others can judge their appropriateness and potential impact on the validity of the findings reported.
+
+Our findings support existing research on clinical trial registration [@vassarEvaluationSelectiveOutcome2020; @goldacreCOMPareProspectiveCohort2019] and general study preregistration [@claesenPreregistrationComparingDream2019; @ofosuPreanalysisPlansStocktaking2019] in suggesting that many researchers do not transparently declare deviations from their pre-specified plans. We found a lower proportion of articles included undeclared deviations (`r (total_undeclared_deviations/20)*100`%) than Claesen et al. found in their sample of preregistered studies published in *Psychological Science* (96%). This could be explained by the outlet of publication (none of our sample were published in *Psychological Science*) or, perhaps more likely, improved reporting standards since the 2015-2017 period studied by Claesen and colleagues. Unreported deviations in our sample were most common in relation to hypotheses (35% of articles), the variables included in hypothesis tests (25%), and the statistical models used to test hypotheses (25%). These results are consistent with Ofosu and Posner’s (2019) observations in the economics and political science literature, who found the median article failed to report 25% of registered hypotheses, 18% included tests of non-registered hypotheses, and 19% articles deviated in the statistical models used (only one of which declared this deviation). Breaking down the types of hypothesis deviations in our study, four articles (20%) failed to report preregistered hypotheses, two (10%) reported non-registered hypotheses, and one (5%) altered preregistered hypotheses (e.g., by changing non-directional to directional predictions). These findings suggest changes to hypotheses post-registration are more diverse than simply developing *post-hoc* hypotheses most consistent with the outcomes (i.e., what Kerr [1998] termed "pure HARKing").
+
+Our findings expand on previous fidelity studies  [@claesenPreregistrationComparingDream2019; @ofosuPreanalysisPlansStocktaking2019] by also reporting the number of instances when we were unable to tell whether authors deviated from their preregistrations due to insufficient detail in their preregistration (U$_P$), article (U$_A$), or both (U$_B$). These outcomes are essential for understanding the value of current preregistration practices. If, as was frequently the case in our study, one cannot determine whether the methods reported in an article are consonant with the allied preregistration, then the value of the practice is seriously diminished. Our breakdown into U$_P$, U$_A$, and U$_B$ scores revealed that ambiguous and/or incomplete reporting in both preregistrations and resulting articles often precludes efforts to cross-check pre-planned methods with those actually used. Preregistrations often included insufficient details of statistical estimation methods to enable comparisons with published articles, and both preregistrations and articles frequently failed to provide any detail regarding procedures used to handle outliers, data handling during collection, testing of statistical assumptions, dealing with missing data, the software used to perform analysis, and randomisation procedures. Claesen and colleagues (2019) also reported that they found it difficult to assess whether authors had deviated from their preregistrations because neither "*preregistrations nor the published studies were written in sufficient detail*" (p. 9).
+
+## Risk of Bias in Reporting Preregistered Studies
+Our evaluation of the risk of reporting bias is, to our knowledge, the first study to use Wicherts et al.’s (2016) checklist for this purpose and provides further insights into preregistration and reporting practices. Of 20 preregistered studies, data were shared for 12 and analysis scripts were available for six. These rates are substantially higher than those found in the wider gambling literature for sharing data and analysis scripts, which were both found in less than 4% of studies in a random sample of 500 gambling research studies for the 2016-2019 period [@louderbackOpenSciencePractices2022]. The higher rates found in our study might be because researchers who preregister their studies are more likely to engage in other open science practices. We found four articles (of 17) that did not mention the study preregistration or link to it, hampering attempts by readers to compare the article with the preregistration. One article (for two preregistrations) did not report a third study that was preregistered. When we contacted the author to enquire about this, they stated that they had originally submitted the preregistered study to a journal and reviewer comments led them to perform two additional experiments, but they did not explain why the outcomes from the original study were not reported anywhere. Further, three articles were not reported sufficiently to enable replication and two (for four preregistrations) contained statistical reporting errors, obfuscating interpretations of findings and replication attempts. These instances represent opportunities for additional education about transparency in reporting that will help advance the gambling field and beyond.
+
+## Limitations
+There are several limitations of our findings that are important to note. First, our sample of preregistrations and articles was restricted to the gambling studies field. Although this conferred the benefits discussed in our introduction (i.e., subject expertise aided evaluation of reporting; concerns of bias in the field), gambling researchers typically come from the fields of psychology, neuroscience, and public health. Therefore, our outcomes might not generalise beyond these disciplines, despite the similarities between our findings and evaluations of preregistered studies in economics and political science [@ofosuPreanalysisPlansStocktaking2019]. Second, we restricted our search for gambling preregistrations to OSF and excluded other repositories like AsPredicted.org, which may have implications for the generalisability of our findings to all gambling preregistrations. However, AsPredicted.org does not currently offer the ability to search for relevant preregistrations (we  contacted AsPredicted.org to see whether we could search their database but did not receive a response). 
+
+
+Third, our statistical power was likely lower than aimed for as we specified our $\alpha$ level at 0.05 in our *a priori* power analysis but used a multiple testing correction method (i.e., Benjamini-Hochberg) that essentially sets a separate (often much lower) $\alpha$ level for each test (see footnote 10). Further, we performed the *a priori* power analysis under the assumption that we would perform one-tailed tests, but (as explained in the "Deviations from our preregistration" section) later determined that two-tailed tests were more appropriate. We conducted a *post-hoc* sensitivity power analysis to determine the effect size required to obtain statistical significance, given our use of two-tailed tests and actual $\alpha$ (0.05), target power (i.e., 0.8), and group sample sizes. This determined that an actual effect size of *d* = 0.69 (equivalent to a Cliff's D of 0.425) was required. We report the protocol and outcomes from this analysis on OSF (https://osf.io/dnfqa). Fourth, changing our Wilcoxon-Mann-Whitney tests from one-tailed to two-tailed after determining that group differences were not unidirectional may have inflated our Type-I error rate (i.e., the risk of finding false-positive outcomes). Fifth, our exploration of preregistration adherence was limited because articles were only available for 20 of the preregistrations in our sample. 
+
+Sixth, there might also be limitations to the specificity scoring protocol we used to evaluate preregistrations. To achieve a maximum score of 3 on most RDoF items requires preregistration authors to explicitly state that they will not deviate from their pre-specified method by, for example, using additional eligibility criteria or reasons for excluding data points. Although such statements may add value in restricting RDoF, this approach is unconventional in scientific research and therefore scores of 2 and 3 could be viewed as equivalent until the value of making explicit promises not to deviate from preregistrations has been empirically evaluated (for interested readers, we have recreated Table 2 and Figure 3 after recoding all scores of "3" to "2" and uploaded this in a supplemental document on OSF: https://osf.io/93hxe). Additionally, some parts of the scoring system largely apply to experimental research (e.g., RDoF items D1 & A9 relate to manipulated independent variables & RDoF C1 relates to blinding procedures). This meant there was a high proportion of NA values for these RDoF items and therefore the imputed values for these items–and test outcomes based on their use—should be viewed cautiously. Finally, while no author scored their own preregistration, the specificity level of the gambling preregistration sample was augmented by the inclusion of those authored by one or more of the present research team. The overall mean specificity score without our preregistrations was `r sprintf("%.2f", round(author_group_summary_scores %>% filter(author_group == "not ours") %>% select(group_mean), 2))` (SD = `r sprintf("%.2f", round(author_group_summary_scores %>% filter(author_group == "not ours") %>% select(sd), 2))`), changing to `r sprintf("%.2f", round(mean_group_overall_specificity_score %>% filter(Preregistration_group == "Gambling sample") %>% ungroup () %>% select(mean), 2))` (SD = `r sprintf("%.2f", round(mean_group_overall_specificity_score %>% filter(Preregistration_group == "Gambling sample") %>% ungroup () %>% select(sd), 2))`) with our preregistrations. After removing preregistrations authored by one or more members, we plotted the overall specificity scores for the gambling sample by year (2017-2020; replicating the format of Figure 3.1) and found year-on-year increases in scores, suggesting that improvements in preregistration reporting are not simply the result of our team's progression in this area (see the section of our analysis process document titled "Impact of our registrations on our outcomes" for this plot; https://osf.io/wqrn8).
+
+## Implications of Findings
+Our findings have several important implications for understanding and advancing the value of preregistration in scientific research. At present, study plans presented in preregistrations would benefit from additional specificity so as to prevent researchers needing to make data-contingent decisions (e.g., when to cease data collection) that could potentially bias findings [@wichertsDegreesFreedomPlanning2016]. Further, the majority of articles reporting preregistered studies contain at least one undeclared deviation from the preregistration and a notable proportion do not mention that the studies were preregistered, precluding evaluations of test severity [@lakensValuePreregistrationPsychological] and preregistration fidelity. What is more, the failure to clearly describe methods in both preregistrations and corresponding articles was problematic and obfuscated evaluations of consistency. In one case, it took two researchers six hours each to score one preregistration for specificity and adherence due to ambiguity and a lack of clarity in the preregistration and inconsistencies with the article. There are a number of factors that likely contribute to these difficulties beyond the control of researchers. For example, strict journal word counts can prevent authors from fully explaining their methods and requests from reviewers and editors made during the review process can lead to changes in the terms used or the analyses conducted that make comparisons with preregistrations difficult. While these issues are not present when writing preregistrations, preregistration remains a relatively new component of the research process and, to date, research institutions have provided little formal training and guidance for preparing preregistrations. Additionally, the time and resources required to undertake preregistration has not been factored into existing funding structures. 
+
+Overall, our findings indicate that, if an overarching goal of preregistration is to reduce RDoF and this can be achieved via writing highly specific research plans, gambling researchers are not currently achieving this goal as their preregistered plans are often vague and lacking in details about the proposed methods. If the goal is to allow readers to evaluate the severity of hypothesis tests, then this too may not  be achieved by current gambling study preregistrations as frequently too few details of planned methods and analyses (e.g., alpha level, stopping rule) are reported to enable proper evaluation of the extent to which the tests could falsify the predictions made in the preregistration. Finally, if the goal of preregistration is to enhance transparency, then disclosing any deviations from the preregistration is an obvious and useful way to further that overarching goal; yet it seems like researchers in gambling studies are not currently doing so for many cases of preregistration deviations. 
+
+These conclusions are concerning as the time required to preregister studies is not insubstantial. @ofosuPreanalysisPlansStocktaking2019 found 88% of economics and political science researchers surveyed spent, on average, at least a week writing their preregistration, 32% spent 2-4 weeks, and 26% spent more than a month; although the majority of those surveyed agreed that the time dedicated to preregistration was worthwhile and that it allowed them to receive useful pre-study feedback and/or it saved time downstream. Still, the time investment has been raised as an objection to preregistration [@ofosuPreanalysisPlansHamper2020] and preregistering one’s study with sufficient detail is challenging [@nosekPreregistrationHardWorthwhile2019] . Evaluations of how preregistering studies impacts the reporting quality, reproducibility, and replicability of published research are needed to confirm whether the benefits justify the additional effort required to review preregistrations.
+
+Preregistration practices appear to be improving. We observed increases in specificity and decreases in the proportion of articles containing undeclared deviations from 2017 to 2020. We provided further evidence that more structured templates like the OSF preregistration[^8] and AsPredicted.org formats typically result in higher levels of specificity than less structured templates like the OSF standard pre-data collection format. Future research in this area could compare additional templates to identify those that result in higher levels of specificity, such as the recently developed Psychological Research Preregistration-Quantitative (PRP-QUANT) Template [@bosnjakTemplatePreregistrationQuantitative2021]. Finally, undertaking this study has provided unique insights into the difficulties faced when trying to interpret preregistrations and evaluate researchers’ adherence to them, which we have used to proffer suggestions for improving the value of preregistration for researchers and organisations involved in the scientific enterprise (journals, research institutions, & funding bodies) below.
+
+[^8]: Recall that while preregistrations listed as using the "Open-ended" format had the highest specificity scores (Figure 3B), 91% of these actually used the OSF preregistration template in a Word document.
+
+## Five Recommendations for Researchers Preregistering Their Studies
+
+1. **State what it takes to falsify your hypothesis:** @lakensValuePreregistrationPsychological recommended that authors of preregistrations do this, and this strategy would overcome many of the issues we observed in gambling study preregistrations. As described, several authors presented multiple predictions as a single hypothesis without specifying whether one or all needed to be supported in order to view the hypothesis as being supported by their data (and possibly increasing the likelihood of authors being able to state that their hypothesis was at least "*partially supported*"). Further, some hypotheses were so vague as to be almost impossible to falsify (e.g., "*The removal of opportunities to bet on live sporting events [due to COVID-19 shutdowns] will lead some sports bettors to engage in other forms of gambling.*"[^9]) and thus tests of these predictions will lack severity [@lakensValuePreregistrationPsychological]. @scheelWhyMostPsychological2022 reports similar issues when assessing Registered Reports–hypotheses were so vaguely specified that it was unclear how they could be operationalised and tested. These issues can be at least partially avoided by stating what outcome(s) would falsify one’s hypotheses.
+2. **Use a structured preregistration template:** Structured templates like the OSF preregistration format are associated with better specificity and can help researchers to understand what information they need to include in their preregistrations to ensure their study plan is sufficiently specified. The highly detailed PRP-QUANT template may be of particular value for quantitative researchers in psychology and related fields [@bosnjakTemplatePreregistrationQuantitative2021]. Authors can further enhance the specificity of their preregistrations by using Bakker et al.’s (2020) scoring protocol as a guide, as we did when preregistering this study.
+3. **Ensure consistency between preregistration and article:** Researchers should make it as easy as possible for others to compare their pre-specified study plan with the resulting article. This can be achieved by using consistent terminology between the two (e.g., for variables & statistical models); by providing each hypothesis with the same, consistent label (e.g., H$^1$); and, if using OSF to post preregistrations, by (re)naming their overarching project page (or relevant sub-component) with the title of the final article. We found many OSF pages contained multiple preregistrations with similar names and overlapping content, making it difficult to discern which preregistration belonged to which article. Users can now rename past preregistrations on OSF and so we encourage all researchers to do this in retrospect, if necessary.
+4. **Clearly and directly link to your preregistration:** Difficulties in connecting preregistrations and articles were also found by @claesenPreregistrationComparingDream2019 and, as they recommended, could be further avoided by including a clear link directly to the allied preregistration(s) in articles and not simply a link to the overall project page.
+5. **Report all deviations from your preregistration:** We recommend that authors report all protocol deviations within their study article under a clear heading like “Deviations from preregistration”, as we have done here. However, space constraints may make it difficult to fully report each deviation, the rationale for the change, and the likely effect on study outcomes. @claesenPreregistrationComparingDream2019 have developed a document for recording all of this information (https://osf.io/xv5rp/) and we have used similar “Transparent changes documents” for this study (https://osf.io/qep2a/) and others (https://osf.io/j6tud/). Whichever format chosen, researchers should share these documents on an accessible repository (e.g., OSF) and/or alongside their article as supplemental material.
+
+[^9]: This particular preregistration also contained the hypothesis "some sports bettors stop gambling because they are primarily interested in sports, not other things.". Thus, one (but likely both) of these two preregistered hypotheses literally has to be true (i.e., sports bettors must either stop gambling or gamble on other activities in the absence of opportunities to bet on sports). 
+
+<!-- Pt 2 -- example from: https://osf.io/chbpt -->
+
+## Five Recommendations for Journals, Research Institutions, and Funding Bodies to Improve the Value of Preregistration
+
+1.	**Support transparency, not a clean narrative:** Echoing the arguments made by the Nature Human Behaviour editorial team (2020), journals should encourage researchers to transparently report all aspects of their studies, including deviations, regardless of whether this makes the findings appear less conclusive or compelling. Others [e.g., @frankenhuisOpenScienceLiberating2018] have suggested that a fully transparent presentation of results, including clear labelling of confirmatory and exploratory analyses, can actually foster creativity and knowledge sharing because all results are presented instead of only significant or “interesting” findings.
+2.	**Remove word count restrictions on methods sections:** The ability to understand exactly how research data were obtained, analysed, and interpreted is fundamental to scientific understanding. Yet, many journals’ word limit policies leave researchers with too little space to fully describe these processes. Word restrictions, if required at all, should be reserved for the introduction and discussion sections of articles so that researchers can freely describe all aspects of their methods and results. 
+3.	**Review preregistrations alongside articles:** As highlighted by @claesenPreregistrationComparingDream2019, existing systems (e.g., open science badges) reward authors for simply performing the act of preregistration, regardless of what information is included. Reviewing preregistrations alongside submitted manuscripts could determine whether authors have preregistered a minimum set of study details (e.g., hypotheses, sample size rationale, measurements, analyses) and any deviations. However, this would likely require incentivising reviewers, whether monetarily or via increased recognition of peer-reviewing contributions when considering candidates for jobs, promotions, and funding opportunities [see @moherHongKongPrinciples2020]. 
+4.	**Provide training and guidance on preregistration:** Teaching researchers about the scientific benefits conferred by study preregistration and providing training courses and guidance on how to write preregistrations will help to ensure that we maximize the benefits of this practice and avoid wasting resources on insufficiently detailed and poorly followed preregistrations.
+5.	**Make preregistration mainstream:** Research institutions and funding bodies should consider study preregistration a normal component of conducting hypothesis-testing research. The time and resources required to preregister studies should be factored into funding programmes and workloads so that researchers have sufficient time to write their preregistrations in a way that will achieve the intended benefits. Journals can also support this effort by including links to preregistrations alongside their articles’ key information (e.g., DOI, author list), by considering the development of novel direct integration strategies within methods sections, and by requiring manuscript sections dedicated to highlighting deviations.
+
+# Conclusions
+A preregistered study is not necessarily better, more rigorous, or more impactful than a non-preregistered one. Preregistration allow others to better evaluate studies by being able to detect deviations from pre-specified plans and to differentiate confirmatory from exploratory analyses. They may also reduce the number of data-contingent decisions researchers need to make when performing their studies and thereby reduce the effects of (conscious or unconscious) bias on study outcomes. Our evaluation of preregistration practices in gambling studies indicates that preregistration activity is increasing in the field and improvements in specificity are occurring, although our sample was limited to only four years (2017-2020). Further improvements in writing preregistrations and reporting the associated studies are necessary if we want to maximise the value of this process and improve the quality of the scientific literature, and we hope the recommendations provided here will be useful for all researchers in achieving these goals, both in gambling-focused research and in science more generally.
+
+\newpage
+
+## Acknowledgements
+The research team would like to thank Dr Dylan Pickering and Thomas Swanton for their assistance with reviewing our preregistration specificity scores. We thank Dr Nicola Black for providing constructive feedback on an earlier version of this article and Su Jeong Cho for her assistance with administration tasks. 
+
+## Conflict of Interest and Funding
+Funding for this project was provided by the Division on Addiction to the University of Sydney via a research contract between the Division on Addiction and GVC Holdings, PLC. GVC Holdings is a large international gambling and online gambling operator. GVC had no involvement with the development of our research questions or protocol or development of this preregistration. The authors declare no conflicts of interest in relation to this study. 
+
+## Disclosures
+The authors declare that there are no competing interests associated with this work. There were no constraints on publishing the findings of this study and we did not require approval from Entain PLC (formerly GVC Holdings), PLC to disseminate any of the findings.
+
+## Analysis Code & *R* Packages Used
+
+We used `r cite_r("r-references.bib")` for all our analyses.
+
+<!-- Key packages to cite other than papaja (already added to library): -->
+
+<!-- `r citation("dplyr")` -->
+<!-- `r citation("beepr")` -->
+<!-- `r citation("extrafont")` -->
+<!-- `r citation("extrafontdb")` -->
+<!-- `r citation("ggplot2")` -->
+<!-- `r citation("patchwork")` -->
+<!-- `r citation("kableExtra")` -->
+<!-- `r citation("english")` -->
+<!-- `r citation("ggridges")` -->
+
+<!-- If adding theBibTeX entries to the .bib file, the first line should look something like this: "@Manual{R-dplyr," with the "R-" telling the "cite_r" function which citations to pick and the following text telling it what name to give the package.  -->
+
+
+All analysis scripts and datasets can be accessed on our OSF project page (https://osf.io/n8rw3/). We used an RMarkdown script to perform all our analyses and develop the figures presented in this manuscript. An "analysis process" HTML document was generated from this script that presents the analysis code alongside the outcomes generated and annotation detailing process of analysing the data and the decisions made throughout (https://osf.io/wqrn8). This manuscript and all tables included were also developed entirely in R using an RMarkdown script and the package *papaja*. We have developed a guide on how to independently reproduce our results and this manuscript using the data and analysis scripts available online (see: https://osf.io/ns32y/; please contact the corresponding author with any questions about this process: robert.heirene@sydney.edu.au; robheirene@gmail.com). 
+
+\newpage
+
+# References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.1in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup
