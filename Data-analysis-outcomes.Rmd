@@ -23,6 +23,7 @@ This document presents the analysis code used to preprocess (e.g., combine datas
 The RMarkdown script underlying this document can be accessed on this project's Open Science Framework (OSF) page:
 
 - https://osf.io/n8rw3/
+- Specific link to script: https://osf.io/3z2jt 
 
 ## Load packages & fonts
 Create function to check to see if packages are installed and install them if they are not, and then load them into the R session. From:
@@ -68,7 +69,7 @@ packages <- c("MOTE",
               "purrr",
               "scales",
               "patchwork",
-              "multicon",
+              # "multicon",
               "ggridges",
               "broom",
               # "broom.mixed",
@@ -89,7 +90,9 @@ packages <- c("MOTE",
               "mice",
               "english",
               "apa",
-              "gtable")
+              "gtable",
+              "osfr",
+              "readxl")
 
 # Load packages:
 ipak(packages)
@@ -101,6 +104,26 @@ rm(list = ls())
 # unlink("Workspace_prereg_study_final_analyses_FINAL.RData")
 ```
 
+Test download data from OSF:
+```{r}
+# This presents an alternative way to download the data for this study (as compared to the method described in our "how to reproduce our manuscript" document)
+
+# here we only download the data from Bakker et al. stored in our OSF repository as a pilot test of using this method. 
+# 
+# osf_retrieve_file("https://osf.io/gfj34") %>%
+#   osf_download(path = "Data/Data from Bakker et al./")
+# 
+# osf_retrieve_file("https://osf.io/av5xr") %>%
+#   osf_download(path = "Data/Data from Bakker et al./")
+# 
+# 
+# osf_retrieve_file("https://osf.io/mkndc") %>%
+#   osf_download(path = "Data/Data from Bakker et al./")
+
+
+```
+
+insert new chunk
 Load relevant fonts for figures:
 ```{r message = FALSE, results = FALSE}
 # font_add_google("Poppins")
@@ -113,7 +136,7 @@ showtext_auto()
 # Selection process flowchart
 
 Before looking at the data, start by plotting figure 1: a flowchart of the preregistration identification and selection process:
-```{r fig.height=7.52, fig.width=6.6,fig.align = 'center', message=FALSE, warning=FALSE, results=FALSE}
+```{r fig.align='center', fig.height=7.52, fig.width=6.6, message=FALSE, warning=FALSE, results=FALSE}
 
 # pdf(file="fig1_flowchart.pdf",
 #     width = 6.5,
@@ -289,7 +312,25 @@ A note here: In our preregistration we called the previous, related study with w
 # 1. Manually download the RData file from: 
 
 # https://osf.io/fgc9k/
-   
+# Specifically: https://osf.io/hbze5
+
+# Or do this via the osfr package (this can be a little buggy with RDS files and so you may need to manually download the file): 
+ 
+
+# retrieve the OSF (main) project
+osf_retrieve_node("fgc9k") %>%
+    # list components
+    osf_ls_nodes() %>%
+    # Select relevant repository
+    filter(name == "Scripts") %>%
+    # list files in this repository
+    osf_ls_files()
+
+# osf_retrieve_file("hbze5") %>%
+# osf_download(path = "Data/Data from Bakker et al./",
+#              conflicts = "overwrite")
+
+
 # 2. Load the RData file into workspace:
 load(file = "Data/Data from Bakker et al./Workspace_prereg_study_final_analyses_FINAL.RData") # LOAD ALL RESULTS/OUTCOMES FROM R ENVIRONMENT
 
@@ -337,6 +378,7 @@ To do this we need to:
 
 data_temp <- data[2:108,1:86] # There are numerous empty columns and rows after the data in the spreadsheet that require removing
 data_final<- data_temp %>%
+  dplyr::rename(Preregistration_number = 1) %>% # I've added this at review to avoid errors as it seemed to give this variable a different name on a different computer.
   filter(Preregistration_number != "Notes on pre-reg above" & 
            Preregistration_number != "EXCLUDED MID-STUDY AS NO HYPOTHESES") %>% # Exclude columns with notes and an irrelevant registration
   mutate(across(c(Q1:Q22), na_if, 99)) # Convert 99 values to NAs where appropriate.
@@ -358,9 +400,9 @@ The following outcomes relate to the **specificity** of gambling researchers' pr
 ### Question-level descriptive scores
 Outcomes represent the scores given to each preregistration at the level of the questions (i.e., the exact score given for each question) and have not been coded in relation to the specific Researcher Degrees of Freedom (RDoF) items from Wicherts et al. (2016), as originally done by Bakker et al. (2018), who developed the scoring protocol we used. As stated in our transparent changes document (https://osf.io/6fk87/), we believe providing outcomes at this level provides more information than when the scores are converted to RDoF items, due to the dependency involved in this method of scoring. 
 
-Let's start by computing some easily readable descriptive statistics for each *specificity* score for the *gambling* preregistrations.
+Let's start by computing some easily readable descriptive statistics for each *specificity* item for the *gambling* preregistrations.
 ```{r message=FALSE, result = 'asis'}
-# Creates summary values for each specificity score:
+# Creates summary values for each specificity item:
 summary_figures <- data_final %>% summarise_at(vars(Q1:Q22), list(mean = mean,
                                    sd = sd,
                                    median = median,
@@ -625,7 +667,7 @@ rdof_items <- as.factor(c("T1","T2","D1",
                           "A11","A12","A13","A14",
                           "A15","R6"))
 
-#  Create a character vector that provides summary versions of the RDoF from Witcherts et al. (2016):
+#  Create a character vector that provides summary versions of the RDoF from Bakker et al.:
 Summarised_rdof_item <- as.factor(c("Conducting exploratory research without any hypothesis",
                                     "Studying a vague hypothesis that fails to specify the direction of the effect",
                                     "Creating multiple manipulated independent variables and conditions",
@@ -687,9 +729,14 @@ sapply(X = data_rdof_format_items[1:29],
        FUN = table)
 ```
 
+## Plot frequency of RDoF score
 Plot frequency of RDoF scores for each item for our scores and those from Bakker et al.:
 ```{r message=FALSE, warning=FALSE, results = FALSE}
+
+
+# Arrange the data for plotting: 
 data_rdof_format_items_graph <- data_rdof_format_items %>% 
+  # Change so that scores are in one column with corresponding item no.s in a second column
   pivot_longer(c(T1,T2,D1,D2,D3,
                          D4,D5,D6,D7,C1,
                          C2, C3,C4,A1,A2,
@@ -699,18 +746,75 @@ data_rdof_format_items_graph <- data_rdof_format_items %>%
                          R6), 
                names_to = "RDoF_Item",
                values_to = "Score") %>%
-  as.data.frame() 
+    as.data.frame() 
+  
+# Now add summary labels that can be used for the y Axis instead of the RDoF codes (as requested by a reviewer):
+
+data_rdof_format_items_graph$RDoF_Item<- recode_factor(data_rdof_format_items_graph$RDoF_Item,
+                          T1 = "T1: Hypothesis",
+                          T2 = "T2: Direction of hypothesis",
+                          D1 = "D1: Multiple manipulated IVs",
+                          D2 = "D2: Additional variables",
+                          D3 = "D3: Multiple DV measures",
+                          D4 = "D4: Additional constructs",
+                          D5 = "D5: Adding exclusion variables",
+                          D6 = "D6: Power analysis",
+                          D7 = "D7: Sampling plan",
+                          C1 = "C1: Random assignment",
+                          C2 = "C2: Blinding",
+                          C3 = "C3: Data handling/collection",
+                          C4 = "C4: Stopping rule",
+                          A1 = "A1: Missing data",
+                          A2 = "A2: Data pre-processing",
+                          A3 = "A3: Statistical ssumptions",
+                          A4 = "A4: Outliers",
+                          A5 = "A5: DV measure selection",
+                          A6 = "A6: DV scoring",
+                          A7 = "A7: Primary outcome selection",
+                          A8 = "A8: IV selection",
+                          A9 = "A9: Defining Manipulated IVs",
+                          A10 = "A10: Adding additional IVs",
+                          A11 = "A11: Defining non-manipulated IVs",
+                          A12 = "A12: Eligibility criteria",
+                          A13 = "A13: Statistical model selection",
+                          A14 = "A14: Method & package",
+                          A15 = "A15: Inference criteria",
+                          R6 = "R6: HARKing")
 
 data_rdof_format_items_graph$RDoF_Item <- as.factor(data_rdof_format_items_graph$RDoF_Item)
 
 data_rdof_format_items_graph$RDoF_Item<- factor(data_rdof_format_items_graph$RDoF_Item,
-                                c("T1", "T2",
-                         "D1","D2","D3", "D4",
-                         "D5","D6", "D7","C1",
-                         "C2","C3","C4", "A1","A2",
-                         "A3","A4","A5","A6","A7","A8",
-                         "A9","A10","A11","A12", "A13","A14",
-                         "A15","R6")) # Re-order factor levels
+                                c(
+                                  "T1: Hypothesis",
+                     "T2: Direction of hypothesis",
+                     "D1: Multiple manipulated IVs",
+                     "D2: Additional variables",
+                     "D3: Multiple DV measures",
+                     "D4: Additional constructs",
+                     "D5: Adding exclusion variables",
+                     "D6: Power analysis",
+                     "D7: Sampling plan",
+                     "C1: Random assignment",
+                     "C2: Blinding",
+                     "C3: Data handling/collection",
+                     "C4: Stopping rule",
+                     "A1: Missing data",
+                     "A2: Data pre-processing",
+                     "A3: Statistical ssumptions",
+                     "A4: Outliers",
+                     "A5: DV measure selection",
+                     "A6: DV scoring",
+                     "A7: Primary outcome selection",
+                     "A8: IV selection",
+                     "A9: Defining Manipulated IVs",
+                     "A10: Adding additional IVs",
+                     "A11: Defining non-manipulated IVs",
+                     "A12: Eligibility criteria",
+                     "A13: Statistical model selection",
+                     "A14: Method & package",
+                     "A15: Inference criteria",
+                     "R6: HARKing")) # Keep the right order for factor levels
+                        
 
 p1 <- data_rdof_format_items_graph %>%
   ggplot(aes(x=Score , y= reorder(RDoF_Item, desc(RDoF_Item)), fill = RDoF_Item)) +
@@ -729,13 +833,14 @@ p1 <- data_rdof_format_items_graph %>%
                                     # vjust=-2.3, 
                                     family = "Cormorant Garamond"))+
   theme(axis.title.y = element_text(color="black", size=10, face="plain",
-                                    # vjust = 2.5, 
+                                    # vjust = -3.5,
                                     family = "Cormorant Garamond")) +
     theme(axis.text.y = element_text(vjust = -.6))+
     ggtitle("Gambling 
 preregistrations")+
   theme(plot.title = element_text(size = 10, hjust = 0.5,color="black", family = "Cormorant Garamond")) +
   theme(legend.position = "none") +
+  # Sig labels to indicate higher scores:
    annotate("text", x = 3.8, y = 29.1, family = "mono", size = 2.5, color = "gray20",
     label = "*") +
    annotate("text", x = 3.8, y = 28.1, family = "mono", size = 2.5, color = "gray20",
@@ -759,7 +864,12 @@ preregistrations")+
    annotate("text", x = 3.8, y = 6.1, family = "mono", size = 2.5, color = "gray20",
     label = "*")  +
    annotate("text", x = 3.8, y = 2.1, family = "mono", size = 2.5, color = "gray20",
-    label = "*")  # We later decided to make the comparisons that were statistically significant and so these are based on the outcomes from our confirmatory tests below
+    label = "*") + # We later decided to make the comparisons that were statistically significant and so these are based on the outcomes from our confirmatory tests below
+  # Sig labels to indicate lower scores:
+   annotate("text", x = 3.8, y = 27.25, family = "mono", size = 1.5, color = "gray20",
+    label = "#")+
+   annotate("text", x = 3.8, y = 9.25, family = "mono", size = 1.5, color = "gray20",
+    label = "#") 
   #  theme(axis.line.x = element_line(arrow = arrow(type='closed', length = unit(10,'pt')))) +
   # # annotate("segment", x = -0.9, xend = 4, y = 1, yend = 1, colour = "black", size=0.4, alpha=.8, arrow=arrow()) +
   # annotate(
@@ -770,6 +880,9 @@ preregistrations")+
 table(data_rdof_format_items_graph)
 
 # Now Bakker et al.: -------------
+
+#Arrange the data for plotting (without semantic labels to minimise text)
+
 Bakker.data_graph <- Bakker.data %>% 
   filter(Preregistration_group == 1) %>%
   select(T1:R6)  %>%
@@ -810,22 +923,47 @@ p2 <- Bakker.data_graph %>%
   theme(axis.title.x = element_text(color="black", size=10, face="plain", 
                                     # vjust=-2.3, 
                                     family = "Cormorant Garamond"))+
-  theme(axis.title.y = element_text(color="black", size=10, face="plain",
-                                    # vjust = 2.5, 
-                                    family = "Cormorant Garamond")) +
-  theme(axis.text.y = element_text(vjust = -.6))+
-    ggtitle("Cross-discplinary 
+   theme(axis.text.y = element_blank()) +
+  # theme(axis.title.y = element_text(color="black", size=10, face="plain",
+  #                                   # vjust = 2.5, 
+  #                                   family = "Cormorant Garamond")) +
+  # theme(axis.text.y = element_text(vjust = -.6))+
+    ggtitle("Cross-discplinary
 preregistrations 
 (Bakker et al., 2020)") +
   theme(plot.title = element_text(size = 10, hjust = 0.5,color="black", family = "Cormorant Garamond")) +
   theme(legend.position = "none")  +
-  # Add significance labels:
+  # Add significance labels to indicate higher scores:
    annotate("text", x = 3.8, y = 27.25, family = "mono", size = 1.5, color = "gray20",
     label = "#")+
-
    annotate("text", x = 3.8, y = 9.25, family = "mono", size = 1.5, color = "gray20",
-    label = "#") # We later decided to make the comparisons that were statistically significant and so these are based on the outcomes from our confirmatory tests below
-
+    label = "#") + # We later decided to make the comparisons that were statistically significant and so these are based on the outcomes from our confirmatory tests below
+# Sig labels to indicate lower scores:
+  annotate("text", x = 3.8, y = 29.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 28.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 24.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*")+
+   annotate("text", x = 3.8, y = 21.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 19.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 18.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 17.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 15.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 11.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 10.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*") +
+   annotate("text", x = 3.8, y = 6.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*")  +
+   annotate("text", x = 3.8, y = 2.1, family = "mono", size = 2.5, color = "gray20",
+    label = "*")
+  
 ```
 
 Now join these plots together for easy comparisons between the samples:
@@ -839,13 +977,13 @@ Fig2 <-  p1 + p2 +
 Fig2.1 <- ggdraw() +
   draw_plot(Fig2) +
   draw_image("arrow.png", scale = .4,
-             x = 0.039, y = -0.49) 
+             x = 0.265, y = -0.5) 
 # Add annotation:
 Fig2.1 + plot_annotation(
   caption = 'Larger scores indicate greater specificity
   
   ') & 
-   theme(plot.caption = element_text(family = 'Cormorant Garamond', hjust = 0.57, vjust = 2, face = "italic", size = 10))
+   theme(plot.caption = element_text(family = 'Cormorant Garamond', hjust = 0.96, vjust = 1.8, face = "italic", size = 10))
 
 # Save plot:
 ggsave("Figures/Fig2.pdf",
@@ -853,6 +991,11 @@ ggsave("Figures/Fig2.pdf",
        height = 7.5,
        units = c("in"))
        
+ggsave("Figures/Fig2.jpeg",
+       width = 4.7,
+       height = 7.5,
+       units = c("in"),
+       dpi = 600)
 ```
 <br>
 
@@ -876,7 +1019,7 @@ list_of_authored_regs<- read.csv("Other_findings_records/list_of_present_author_
 # head(list_of_authored_regs) # Check the data has loaded correctly
 
 list_of_reg_nos <- list_of_authored_regs %>% 
-  select(Preregistration_number = Pre.reg..) %>% # Isolate the relevant registration nos. and make the label consistent with the main dataset
+  select(Preregistration_number = 1) %>% # Isolate the relevant registration nos. and make the label consistent with the main dataset. (I changed this post-review from the column name to position as it gives it a different name on different computers)
   as_tibble() # Convert to tibble so that we can see what class the column is
 
 data_rdof_format$Preregistration_number <- as.numeric(data_rdof_format$Preregistration_number)  # Make class consistent 
@@ -951,7 +1094,7 @@ excl. authors' own")+
 
 Now join all 3 plots together for easy comparisons between them:
 ```{r message=FALSE, warning=FALSE, fig.align = 'center', fig.height = 8, fig.width = 9}
-p3 + p1 + p2
+p1 + p3 + p2
 ```
 <br>
 
@@ -1068,7 +1211,11 @@ Preregistered confirmatory analysis plan (note: we used the term "restriction sc
 - "*We will use one-tailed non-parametric Wilcoxon-Mann-Whitney analyses to test the hypothesis that preregistrations of gambling studies will restrict RDoF to a lesser extent (i.e., have lower restriction scores) than the multidisciplinary sample of preregistrations. The Wilcoxon-Mann-Whitney tests will compare differences in restriction scores between gambling preregistrations and the random sample (n = 53) of multidisciplinary preregistrations selected by Bakker et al. (2018). For restriction scores scored as “N.A.”, Bakker et al. used a two-way imputation procedure based on corresponding row and column means before the restriction scores between the two groups of preregistrations were compared. Before conducting our confirmatory analyses, we will employ the same procedure for gambling preregistrations that are given N.A. scores and the resulting imputed data will be compared with the imputed data for Bakker and colleagues’ 53 multidisciplinary preregistrations.*"
 
 ### Imputation
-Start by imputing missing (i.e., NA) scores within the gambling dataset:
+Start by imputing missing (i.e., NA) scores within the gambling dataset. This two-way imputation process is described in the below paper:
+
+- Bernaards, C. A., & Sijtsma, K. (2000). Influence of simple imputation and EM methods on factor analysis when item nonresponse in questionnaire data is nonignorable. Multivariate Behavioral Research, 35(3), 321-364.
+
+In the calculation, i = item mean and j = preregistration mean.
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -1181,6 +1328,7 @@ test_results <- t(sapply(combineddata[,6:35], function(x) unlist(wilcox.test(x ~
 ```
 
 The above analysis involves one tailed Wilcox tests but contrary to our hypothesis, it seems gambling study preregistrations score much higher than the cross-disciplinary preregistrations. So, let's perform two-tailed tests instead:
+
 ```{r message=FALSE, warning=FALSE}
 test_results <- t(sapply(combineddata[,6:35], function(x) unlist(wilcox.test(x ~ combineddata$Preregistration_group,
                                                 paired = FALSE,
@@ -1241,7 +1389,7 @@ author_grouped_data_temp<- list_of_reg_nos %>%
   bind_cols(author_group) %>% # Add label
   dplyr::rename(author_group = ...2) %>%
   full_join(combineddata) %>% # Merge with main dataset 
-  filter(Preregistration_group != "1") # Isolate our sample
+  filter(Preregistration_group == "2") # Isolate our sample
 
 author_grouped_data_temp$author_group[is.na(author_grouped_data_temp$author_group)] <- "not ours" # Replace missing values in our new column with a label to note that these registrations were not authored by one of us. 
 
@@ -1373,6 +1521,8 @@ GeomFlatViolin <-
 Now create summary plots:
 ```{r fig.align='center', fig.height=3.5, fig.width=8, message=TRUE, warning=FALSE}
 
+
+# Year of registration:
 fig3.1 <- combineddata %>%
   select(1:34,
          mean_score = "Mean score",
@@ -1415,6 +1565,9 @@ combineddata$Registration.type.format<- factor(combineddata$Registration.type.fo
                                   )) # Re-order factor levels
 
 
+
+# Template:
+
 fig3.2 <- combineddata %>%
   select(1:3,
         Template = Registration.type.format, 5:34,
@@ -1436,7 +1589,7 @@ ggplot(mapping =  aes(x = Template, y = mean_score), fill = Template) +
   # scale_fill_manual(values=c("#E69F00", "#56B4E9")) +
   geom_boxplot(aes(x = Template, y = mean_score, fill = Template),
                position = position_nudge(x = 0.18, y = 0), outlier.shape = NA, alpha = .5, width = .08) +
-    scale_fill_viridis_d() +
+    scale_fill_viridis_d(option = "inferno") +
   scale_y_continuous(name = "Mean specificty score", 
                      # limits = c(0, 2),
                      breaks = c(0, 0.5, 1, 1.5, 2, 2.5, 3)) +
@@ -1482,10 +1635,16 @@ ggsave("Figures/Fig3.pdf",
        width = 180,
        height = 110,
        units = c("mm"))
+
+ggsave("Figures/Fig3.jpeg",
+       width = 180,
+       height = 110,
+       units = c("mm"),
+       dpi = 600)
 ```
 
 ## Year of registration for Bakker et al. sample
-When were the preregistrations in Bakker et al.'s sample registered? We got an intern to add all the dates to a dataset so let's load that in and provide some summary stats.
+When were the preregistrations in Bakker et al.'s sample registered? We asked an (very nice) intern to add all the dates to a dataset so let's load that in and provide some summary stats.
 
 ```{r}
 Bakker_data_w_dates<- read.csv("Data/Data from Bakker et al./Bakker_data_with_dates_of_registration.csv") # LOAD dataset
@@ -1511,7 +1670,7 @@ Bakker_data_w_dates_final %>% select(year, Preregistration_number, Link)
 # So, I'm sure we can safely assume all were registered in 2016
 ```
 
-## No. hypotheses
+## No. of hypotheses
 
 Let's also compute some summary figures for the number of hypotheses. There was some confusion here as to how many hypotheses researchers were stating and so we've given minimum and maximum values for the total number of hypotheses within each preregistration.
 
@@ -1628,6 +1787,12 @@ ggsave("Figures/Fig4.pdf",
        height = 90,
        units = c("mm"))
 # Make a second plot of the same info but with a different colour scheme to join to the below scatter plots (new colour scheme avoids confusing the two scales with different meanings)
+
+ggsave("Figures/Fig4.jpeg",
+       width = 90,
+       height = 90,
+       units = c("mm"),
+       dpi = 600)
 
 pCor<- ggcorrplot(Correlation, 
            # p.mat = cor_pmat(data_rdof_format_imputed_summary_categories2),
@@ -1801,6 +1966,12 @@ ggsave("Figures/Fig4_extended.pdf",
        width = 180,
        height = 120,
        units = c("mm"))
+
+ggsave("Figures/Fig4_extended.jpeg",
+       width = 180,
+       height = 120,
+       units = c("mm"),
+       dpi = 600)
 
 ```
 Some of the correlations appear to be influenced by an outlier, which is one of our preregistrations.
@@ -2289,6 +2460,133 @@ Let's manually check these errors to see if statcheck has accurately detected th
 - No errors in #34.
 - No errors in #50.
 - No errors in #51.
+
+# --------------------------------------------------------------------------------
+# Post-peer review changes & additions
+
+Any analyses from this point onwards were performed following peer review of the manuscript at *Meta-Psychology*. 
+
+Reviewer comment: Could you say a little more about the gambling studies in the sample in terms of what sorts of questions they sought to answer, and what their broad methodological characteristics were (e.g., experiment/not)?
+
+To address this concern we extracted the study design and research question from every preregistration. Below we calculate summary accounts for the different design types:
+```{r warnings = FALSE, message = FALSE}
+
+design_summary<- read_excel("Data/study_design_list_gambling_registrations.xlsx")
+
+
+design_summary %>%
+  group_by(Design) %>%
+  count() %>%
+  kable(
+    caption = '<b>Summary of pre-registered study design types</b>', align = "c", format = 'html',
+    digits = 2,
+   col.names = c("Design","Frequency")) %>%
+   kable_classic(full_width = F, html_font = "Cambria")
+```
+
+## Year of registration for our sample
+During revisions, we noticed that there was an error in our description of the percentage of the total number of gambling preregistrations that were published each year. As such, I've calculated the exact percentages here and now directly use this dataframe to insert the correct values via R code into the manuscript (see discussion subsection "Preregistration specificity").
+```{r}
+year_of_registration<- combineddata %>% 
+  filter(Preregistration_group == "2") %>% # Isolate our sample
+  select(Year) %>% 
+  group_by(Year) %>% 
+  count()  %>% 
+  mutate(Percentage = (n/54)*100)
+
+
+kable(year_of_registration,
+    caption = '<b>Gambling preregistrations by year</b>', align = "c", format = 'html',
+    digits = 2,
+   col.names = c("Year","Frequency", "Percentage")) %>%
+   kable_classic(full_width = F, html_font = "Cambria")
+
+```
+
+## Overall mean specificity score by group
+We also noticed in revisions that we don't provide summary figures for the overall mean specificity score for each group of preregistrations, like we have done for each item in Table 3. We calculate these Values below and have now added them into the text below the table. We also now use these values to discuss how the overall specificity score for gambling preregistration changes with the removal of preregistrations authored by the present team in the limitations section of the manuscript (this is in response to a review request to discuss this issue [I.e., the impact of our registrations in the sample] further)
+
+```{r}
+# Make the grouping variable a factor column (I tried to do this using mutate(x, as.factor(x)) within the next code chunk, but it kept throwing up errors for some reason):
+combineddata$Preregistration_group <- as.factor(combineddata$Preregistration_group)
+
+# Calculate summary scores for the overall mean specificity score:
+mean_group_overall_specificity_score<- combineddata %>% 
+    dplyr::mutate(Preregistration_group = fct_recode(Preregistration_group,
+                                              "Cross-disciplinary sample" = "1",
+                                             "Gambling sample" = "2")) %>% # Recode the grouping variables so that we can easily tell which sample is which
+  dplyr::rename(mean_score = "Mean score") %>%
+  dplyr::group_by(Preregistration_group) %>%
+  dplyr::summarize(mean = mean(mean_score),
+                   sd = sd(mean_score),
+                   median = median(mean_score)
+            )
+
+# Table scores:
+kable(mean_group_overall_specificity_score,
+    caption = '<b>Mean, SD, & median of the overall mean specificity score by group</b>', align = "c", format = 'html',
+    digits = 2,
+   col.names = c("Group","Mean", "SD", "Median")) %>%
+   kable_classic(full_width = F, html_font = "Cambria")
+
+
+```
+
+## Impact of our registrations on our outcomes
+As per the above comments, one reviewer requested we discuss which conclusions of hours may have been employed by the inclusion of several (17) preregistrations authored by the present team.
+
+
+```{r}
+
+# Wrangle the relevant data
+ combineddata %>% 
+  filter(Preregistration_group == "2") %>% # Focus on
+  anti_join(list_of_reg_nos) %>% # removes our preregistrations from the sample
+  as_tibble() %>%
+  select(1:34,
+         mean_score = "Mean score",
+         36) %>%
+  mutate(Year = as.factor(Year)) %>%
+  # Plot as for Fig 3.1:
+ggplot(mapping =  aes(x = Year, y = mean_score), fill = Year) +
+  geom_flat_violin(aes(fill = Year),
+                   position = position_nudge(x = 0.27, y = 0), adjust = .9, trim = FALSE, alpha = .75, colour = "black")+
+  geom_point(aes(x = Year, y = mean_score, fill = Year),
+             position = position_jitter(width = .1), size = .5) +
+  # scale_fill_manual(values=c("#E69F00", "#56B4E9")) +
+  geom_boxplot(aes(x = Year, y = mean_score, fill = Year),
+               position = position_nudge(x = 0.18, y = 0), outlier.shape = NA, alpha = .5, width = .08) +
+    scale_fill_viridis_d() +
+  scale_y_continuous(name = "Mean specificty score", breaks = c(0, 0.5, 1, 1.5, 2, 2.5, 3)) +
+  scale_x_discrete(name = "") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  theme(axis.text = element_text(color = "black", size = 10, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.text.y = element_text(color = "black", size = 10, face = "plain", family = "Cormorant Garamond"))+
+  theme(axis.title.x = element_text(color="black", size=10, face="plain", 
+                                    # vjust=-2.3, 
+                                    family = "Cormorant Garamond"))+
+  theme(axis.title.y = element_text(color="black", size=11, face="plain",
+                                    # vjust = 2.5, 
+                                    family = "Cormorant Garamond")) +
+    # ggtitle("")+
+  theme(legend.position = "none")
+```
+
+### Bayesian tests
+
+```{r}
+
+# install.packages("remotes")
+# devtools::install_github("joereinhardt/BayesianFirstAid-Wilcoxon")
+# 
+# library("BayesianFirstAid-Wilcoxon")
+# 
+# devtools::install_github("rasmusab/bayesian_first_aid")
+# 
+# library("BayesianFirstAid-Wilcoxon")
+
+```
 
 # --------------------------------------------------------------------------------
 
