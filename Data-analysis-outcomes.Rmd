@@ -318,27 +318,27 @@ A note here: In our preregistration we called the previous, related study with w
  
 
 # retrieve the OSF (main) project
-osf_retrieve_node("fgc9k") %>%
-    # list components
-    osf_ls_nodes() %>%
-    # Select relevant repository
-    filter(name == "Scripts") %>%
-    # list files in this repository
-    osf_ls_files()
+# osf_retrieve_node("fgc9k") %>%
+#     # list components
+#     osf_ls_nodes() %>%
+#     # Select relevant repository
+#     filter(name == "Scripts") %>%
+#     # list files in this repository
+#     osf_ls_files()
+# 
+# # osf_retrieve_file("hbze5") %>%
+# # osf_download(path = "Data/Data from Bakker et al./",
+# #              conflicts = "overwrite")
 
-# osf_retrieve_file("hbze5") %>%
-# osf_download(path = "Data/Data from Bakker et al./",
-#              conflicts = "overwrite")
-
-
+getwd()
 # 2. Load the RData file into workspace:
-load(file = "Data/Data from Bakker et al./Workspace_prereg_study_final_analyses_FINAL.RData") # LOAD ALL RESULTS/OUTCOMES FROM R ENVIRONMENT
+load(file = "Data/Data from Bakker et al/Workspace_prereg_study_final_analyses_FINAL.RData") # LOAD ALL RESULTS/OUTCOMES FROM R ENVIRONMENT
 
 # 3. Select the relevant object and write into a readable csv file for easy future access:
 
 #  NON-IMPUTED data:
 write.table(data,
-            file = "Data/Data from Bakker et al./multidiscpinary_registrationsBakker.csv",
+            file = "Data/Data from Bakker et al/multidiscpinary_registrationsBakker.csv",
             sep = ",",
             row.names = TRUE)
 
@@ -976,8 +976,9 @@ Fig2 <-  p1 + p2 +
 # Draw on arrow:
 Fig2.1 <- ggdraw() +
   draw_plot(Fig2) +
-  draw_image("arrow.png", scale = .4,
+  draw_image("Figures/arrow.png", scale = .4,
              x = 0.265, y = -0.5) 
+
 # Add annotation:
 Fig2.1 + plot_annotation(
   caption = 'Larger scores indicate greater specificity
